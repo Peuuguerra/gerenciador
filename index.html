@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr. Shake - Gerenciamento de Pedidos</title>
+    <style>
+        /* Estilos para a página de gerenciamento de pedidos Mr. Shake */
+        :root {
+            --primary-color: #8A2BE2; /* Roxo */
+            --secondary-color: #FF0000; /* Vermelho */
+            --accent-color: #FFD700; /* Amarelo */
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Estilos do cabeçalho */
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+            margin-right: 15px;
+            border-radius: 50%;
+        }
+
+        .brand-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-name {
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Estilos da tela de login */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 120px;
+            margin-bottom: 20px;
+            border-radius: 50%;
+        }
+
+        .login-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: #7526c1;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* Estilos das abas */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #e9ecef;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Estilos da tabela de pedidos */
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 1rem;
+        }
+
+        .search-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .orders-table th, .orders-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .orders-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .orders-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+            min-width: 120px;
+        }
+
+        .status-received {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .status-preparing {
+            background-color: var(--warning-color);
+            color: black;
+        }
+
+        .status-ready {
+            background-color: var(--accent-color);
+            color: black;
+        }
+
+        .status-delivering {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .status-delivered {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status-canceled {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .details-btn {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .details-btn:hover {
+            background-color: #138496;
+        }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #bd2130;
+        }
+
+        .refresh-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .refresh-btn:hover {
+            background-color: #7526c1;
+        }
+
+        .refresh-icon {
+            margin-right: 5px;
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+        }
+
+        .auto-refresh label {
+            margin-right: 10px;
+        }
+
+        .auto-refresh select {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        /* Estilos do modal de detalhes do pedido */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .order-details {
+            margin-top: 20px;
+        }
+
+        .order-details h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            width: 150px;
+            color: var(--dark-color);
+        }
+
+        .detail-value {
+            flex: 1;
+        }
+
+        .products-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .products-list li {
+            padding: 5px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .status-actions {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .status-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            flex: 1;
+            min-width: 120px;
+            margin-bottom: 10px;
+        }
+
+        .btn-received {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .btn-preparing {
+            background-color: var(--warning-color);
+            color: black;
+        }
+
+        .btn-ready {
+            background-color: var(--accent-color);
+            color: black;
+        }
+
+        .btn-delivering {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-delivered {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-canceled {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        /* Estilos para notificações */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+
+        .notification {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Estilos para o log de notificações */
+        .notification-log-container {
+            margin-top: 30px;
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .notification-log-title {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .notification-log {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+            display: flex;
+        }
+
+        .log-time {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-right: 10px;
+            min-width: 80px;
+        }
+
+        .log-message {
+            flex: 1;
+        }
+
+        /* Estilos para o botão de adicionar pedido de teste */
+        .add-test-order {
+            background-color: var(--accent-color);
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .add-test-order:hover {
+            background-color: #e6c200;
+        }
+
+        /* Estilos para o botão de configuração */
+        .config-button {
+            background-color: var(--accent-color);
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .config-button:hover {
+            background-color: #e6c200;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-left {
+                margin-bottom: 10px;
+                flex-direction: column;
+            }
+
+            .logo {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .user-info {
+                flex-direction: column;
+            }
+
+            .user-name {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .orders-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+
+            .status-actions {
+                flex-direction: column;
+            }
+
+            .status-btn {
+                width: 100%;
+            }
+
+            .refresh-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .auto-refresh {
+                margin-top: 10px;
+            }
+        }
+
+        /* Estilos para o botão de simulação de pedido */
+        .simulate-order-btn {
+            background-color: var(--accent-color);
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .simulate-order-btn:hover {
+            background-color: #e6c200;
+        }
+
+        /* Estilos para o formulário de configuração */
+        #integrationConfigForm .form-group {
+            margin-bottom: 20px;
+        }
+
+        #integrationConfigForm label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        #integrationConfigForm input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #integrationConfigForm small {
+            display: block;
+            color: #6c757d;
+            margin-top: 5px;
+            font-size: 0.8rem;
+        }
+
+        /* Estilos para mensagens de status da integração */
+        .integration-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .integration-status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .integration-status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .integration-status.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="login-container">
+        <img src="img/logo.png" alt="Logo Mr. Shake" class="login-logo">
+        <h2 class="login-title">Mr. Shake - Login</h2>
+        <form id="loginForm" class="login-form">
+            <div class="form-group">
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn-primary">Entrar</button>
+        </form>
+        <div id="loginError" class="error-message"></div>
+    </div>
+
+    <!-- Tela Principal (inicialmente oculta) -->
+    <div id="mainScreen" class="container" style="display: none;">
+        <div class="header">
+            <div class="header-left">
+                <img src="img/logo.png" alt="Logo Mr. Shake" class="logo">
+                <h1 class="brand-name">Mr. Shake - Gerenciamento de Pedidos</h1>
+            </div>
+            <div class="user-info">
+                <span class="user-name" id="userDisplay">Usuário: Admin</span>
+                <button id="logoutBtn" class="logout-btn">Sair</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="currentOrders">Pedidos Atuais</button>
+            <button class="tab" data-tab="orderHistory">Histórico</button>
+        </div>
+
+        <!-- Conteúdo da aba de Pedidos Atuais -->
+        <div id="currentOrders" class="tab-content active">
+            <div class="refresh-container">
+                <button id="refreshBtn" class="refresh-btn">
+                    <span class="refresh-icon">↻</span> Atualizar
+                </button>
+                <div class="auto-refresh">
+                    <label for="autoRefreshInterval">Atualização automática:</label>
+                    <select id="autoRefreshInterval">
+                        <option value="0">Desativada</option>
+                        <option value="10">10 segundos</option>
+                        <option value="30" selected>30 segundos</option>
+                        <option value="60">1 minuto</option>
+                        <option value="300">5 minutos</option>
+                    </select>
+                </div>
+                <button id="simulateOrderBtn" class="simulate-order-btn">Simular Novo Pedido</button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nome do cliente...">
+                <button id="searchBtn" class="search-btn">Buscar</button>
+            </div>
+
+            <table class="orders-table" id="currentOrdersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Produtos</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão preenchidos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Conteúdo da aba de Histórico -->
+        <div id="orderHistory" class="tab-content">
+            <div class="search-container">
+                <input type="text" id="historySearchInput" class="search-input" placeholder="Buscar por nome do cliente...">
+                <button id="historySearchBtn" class="search-btn">Buscar</button>
+            </div>
+
+            <table class="orders-table" id="historyOrdersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Produtos</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão preenchidos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Log de Notificações -->
+        <div class="notification-log-container">
+            <h3 class="notification-log-title">Log de Notificações</h3>
+            <div id="notificationLog" class="notification-log">
+                <!-- Entradas de log serão adicionadas via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Pedido -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Detalhes do Pedido</h2>
+            <div id="orderDetails" class="order-details">
+                <!-- Detalhes serão preenchidos via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Container de Notificações -->
+    <div id="notificationContainer" class="notification-container">
+        <!-- Notificações serão adicionadas via JavaScript -->
+    </div>
+
+    <script>
+        // Variáveis globais
+        let currentOrders = [];
+        let orderHistory = [];
+        let autoRefreshInterval = null;
+        let currentUser = null;
+        let userRole = null;
+
+        // Elementos DOM
+        const loginScreen = document.getElementById('loginScreen');
+        const mainScreen = document.getElementById('mainScreen');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const userDisplay = document.getElementById('userDisplay');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const autoRefreshSelect = document.getElementById('autoRefreshInterval');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const historySearchInput = document.getElementById('historySearchInput');
+        const historySearchBtn = document.getElementById('historySearchBtn');
+        const currentOrdersTable = document.getElementById('currentOrdersTable');
+        const historyOrdersTable = document.getElementById('historyOrdersTable');
+        const orderModal = document.getElementById('orderModal');
+        const orderDetails = document.getElementById('orderDetails');
+        const closeModalBtn = document.querySelector('.close');
+        const notificationContainer = document.getElementById('notificationContainer');
+        const notificationLog = document.getElementById('notificationLog');
+        const simulateOrderBtn = document.getElementById('simulateOrderBtn');
+
+        // Usuários do sistema
+        const users = [
+            { username: 'admin', password: 'admin123', role: 'admin', displayName: 'Administrador' },
+            { username: 'atendente', password: 'atendente123', role: 'attendant', displayName: 'Atendente' }
+        ];
+
+        // Configuração de integração com n8n
+        const config = {
+            baseUrl: window.location.origin,
+            getOrdersUrl: `${window.location.origin}/api/pedidos/get-orders`,
+            notifyUrl: `${window.location.origin}/api/pedidos/notificar`,
+            updateStatusUrl: `${window.location.origin}/api/pedidos/update-status`,
+            
+            // Intervalo de atualização automática (em milissegundos)
+            updateInterval: 30000, // 30 segundos
+            
+            // Credenciais para autenticação (se necessário)
+            apiKey: "", // Será preenchido pelo usuário na configuração
+            
+            // Status de pedidos
+            orderStatuses: [
+                "Pedido Recebido",
+                "Em Preparo",
+                "Pronto para Entrega",
+                "Saiu para Entrega",
+                "Entregue",
+                "Cancelado"
+            ]
+        };
+
+        // Função para verificar login
+        function checkLogin(username, password) {
+            return users.find(user => user.username === username && user.password === password);
+        }
+
+        // Função para mostrar notificação
+        function addNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notificationContainer.appendChild(notification);
+
+            // Remover após 5 segundos
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Função para adicionar entrada no log de notificações
+        function addToNotificationLog(message) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">${new Date().toLocaleTimeString()}</span>
+                <span class="log-message">${message}</span>
+            `;
+            notificationLog.prepend(logEntry);
+        }
+
+        // Função para validar e normalizar dados de pedido
+        function validateAndNormalizeOrder(order) {
+            try {
+                // Verificar campos obrigatórios
+                if (!order) {
+                    throw new Error("Dados de pedido inválidos");
+                }
+                
+                // Normalizar dados
+                return {
+                    id: order.id || Date.now().toString(),
+                    nomeCliente: order.nomeCliente || order.cliente || "Cliente",
+                    telefone: order.telefone || "",
+                    endereco: order.endereco || "",
+                    produtos: Array.isArray(order.produtos) ? order.produtos : 
+                             (order.produtos ? [order.produtos] : 
+                             (order.sabor ? [order.sabor] : ["Produto"])),
+                    valorTotal: typeof order.valorTotal === "number" ? order.valorTotal : 
+                               (parseFloat(order.valorTotal || order.preco || 0) || 0),
+                    status: order.status || "Pedido Recebido",
+                    timestamp: order.timestamp || new Date().toISOString(),
+                    formaPagamento: order.formaPagamento || order.pagamento || "Não informado"
+                };
+            } catch (error) {
+                console.error("Erro ao validar pedido:", error, order);
+                // Retornar um pedido padrão em caso de erro
+                return {
+                    id: Date.now().toString(),
+                    nomeCliente: "Cliente",
+                    telefone: "",
+                    endereco: "",
+                    produtos: ["Produto"],
+                    valorTotal: 0,
+                    status: "Pedido Recebido",
+                    timestamp: new Date().toISOString(),
+                    formaPagamento: "Não informado"
+                };
+            }
+        }
+
+        // Função para buscar com tratamento de erros e retry
+        async function fetchWithRetry(url, options, maxRetries = 3) {
+            let retries = 0;
+            let lastError;
+            
+            while (retries < maxRetries) {
+                try {
+                    const response = await fetch(url, options);
+                    
+                    if (response.ok) {
+                        return await response.json();
+                    } else {
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+                } catch (error) {
+                    lastError = error;
+                    console.warn(`Tentativa ${retries + 1} falhou:`, error);
+                    
+                    // Esperar antes de tentar novamente (backoff exponencial)
+                    await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
+                    retries++;
+                }
+            }
+            
+            // Se chegou aqui, todas as tentativas falharam
+            throw new Error(`Falha após ${maxRetries} tentativas: ${lastError.message}`);
+        }
+
+        // Função para buscar pedidos do n8n
+        async function fetchOrdersFromN8n() {
+            try {
+                addNotification("Buscando pedidos do n8n...");
+                addToNotificationLog("Iniciando busca de pedidos do n8n...");
+                
+                const data = await fetchWithRetry(config.getOrdersUrl, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": config.apiKey ? `Bearer ${config.apiKey}` : undefined
+                    }
+                });
+                
+                console.log("Dados recebidos do n8n:", data);
+                addToNotificationLog(`Dados recebidos do n8n: ${JSON.stringify(data).substring(0, 100)}...`);
+                
+                // Extrair e normalizar pedidos
+                let pedidosArray = [];
+                
+                if (Array.isArray(data)) {
+                    pedidosArray = data;
+                } else if (data && data.json) {
+                    pedidosArray = Array.isArray(data.json) ? data.json : [data.json];
+                } else if (data && data.pedidos) {
+                    pedidosArray = Array.isArray(data.pedidos) ? data.pedidos : [data.pedidos];
+                } else if (data && typeof data === 'object') {
+                    // Tentar extrair qualquer array encontrado no objeto
+                    for (const key in data) {
+                        if (Array.isArray(data[key])) {
+                            pedidosArray = data[key];
+                            break;
+                        }
+                    }
+                    
+                    // Se ainda não encontrou um array, tentar usar o próprio objeto
+                    if (pedidosArray.length === 0 && Object.keys(data).length > 0) {
+                        pedidosArray = [data];
+                    }
+                }
+                
+                // Normalizar cada pedido
+                const convertedOrders = pedidosArray.map(validateAndNormalizeOrder);
+                
+                // Atualizar a lista de pedidos
+                updateOrdersList(convertedOrders);
+                
+                const message = `${convertedOrders.length} pedidos carregados com sucesso!`;
+                addNotification(message, "success");
+                addToNotificationLog(message);
+                
+                return convertedOrders;
+            } catch (error) {
+                const errorMessage = `Erro ao buscar pedidos: ${error.message}`;
+                addNotification(errorMessage, "error");
+                addToNotificationLog(errorMessage);
+                console.error("Erro ao buscar pedidos:", error);
+                
+                // Em caso de falha, tentar usar dados locais
+                return [];
+            }
+        }
+
+        // Função para enviar atualização de status para o n8n
+        async function sendStatusUpdateToN8n(order, newStatus) {
+            try {
+                const message = `Enviando atualização de status para o n8n...`;
+                addNotification(message);
+                addToNotificationLog(message);
+                
+                const payload = {
+                    orderId: order.id,
+                    telefone: order.telefone,
+                    nomeCliente: order.nomeCliente,
+                    oldStatus: order.status,
+                    newStatus: newStatus,
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log("Enviando payload:", payload);
+                addToNotificationLog(`Enviando payload: ${JSON.stringify(payload).substring(0, 100)}...`);
+                
+                const data = await fetchWithRetry(config.updateStatusUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": config.apiKey ? `Bearer ${config.apiKey}` : undefined
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const successMessage = `Status atualizado com sucesso! Notificação enviada para ${order.telefone}`;
+                addNotification(successMessage, "success");
+                addToNotificationLog(successMessage);
+                
+                return data;
+            } catch (error) {
+                const errorMessage = `Erro ao atualizar status: ${error.message}`;
+                addNotification(errorMessage, "error");
+                addToNotificationLog(errorMessage);
+                console.error("Erro ao atualizar status:", error);
+                
+                // Atualizar localmente mesmo em caso de falha
+                return null;
+            }
+        }
+
+        // Função para enviar notificação WhatsApp via n8n
+        async function sendWhatsAppNotification(order, oldStatus, newStatus) {
+            try {
+                const message = `Enviando notificação WhatsApp via n8n...`;
+                addNotification(message);
+                addToNotificationLog(message);
+                
+                const payload = {
+                    orderId: order.id,
+                    telefone: order.telefone,
+                    nomeCliente: order.nomeCliente,
+                    oldStatus: oldStatus,
+                    newStatus: newStatus,
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log("Enviando payload de notificação:", payload);
+                
+                const data = await fetchWithRetry(config.notifyUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": config.apiKey ? `Bearer ${config.apiKey}` : undefined
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const successMessage = `Notificação WhatsApp enviada com sucesso para ${order.telefone}`;
+                addNotification(successMessage, "success");
+                
+                // Adicionar ao log de notificações
+                addToNotificationLog(`WhatsApp enviado para ${order.telefone} via n8n`);
+                
+                return data;
+            } catch (error) {
+                const errorMessage = `Erro ao enviar notificação: ${error.message}`;
+                addNotification(errorMessage, "error");
+                addToNotificationLog(errorMessage);
+                console.error("Erro ao enviar notificação:", error);
+                
+                // Fallback para simulação local
+                simulateWhatsAppNotification(order, oldStatus, newStatus);
+                return null;
+            }
+        }
+
+        // Função para simular notificação WhatsApp
+        function simulateWhatsAppNotification(order, oldStatus, newStatus) {
+            // Criar mensagem baseada no status
+            let mensagem = "";
+            switch (newStatus) {
+                case 'Pedido Recebido':
+                    mensagem = `Olá ${order.nomeCliente}! Recebemos seu pedido #${order.id.substring(0, 8)}. Estamos preparando tudo com muito carinho!`;
+                    break;
+                case 'Em Preparo':
+                    mensagem = `Olá ${order.nomeCliente}! Seu pedido #${order.id.substring(0, 8)} está sendo preparado neste momento. Logo estará pronto!`;
+                    break;
+                case 'Pronto para Entrega':
+                    mensagem = `Olá ${order.nomeCliente}! Seu pedido #${order.id.substring(0, 8)} está pronto e será enviado para entrega em breve.`;
+                    break;
+                case 'Saiu para Entrega':
+                    mensagem = `Olá ${order.nomeCliente}! Seu pedido #${order.id.substring(0, 8)} acabou de sair para entrega. Logo chegará até você!`;
+                    break;
+                case 'Entregue':
+                    mensagem = `Olá ${order.nomeCliente}! Seu pedido #${order.id.substring(0, 8)} foi entregue. Aproveite! Agradecemos a preferência.`;
+                    break;
+                case 'Cancelado':
+                    mensagem = `Olá ${order.nomeCliente}! Infelizmente seu pedido #${order.id.substring(0, 8)} foi cancelado. Entre em contato conosco para mais informações.`;
+                    break;
+            }
+            
+            // Adicionar ao log de notificações
+            addToNotificationLog(`WhatsApp simulado para ${order.telefone || 'cliente'}: "${mensagem}"`);
+            
+            // Mostrar notificação
+            addNotification("Notificação WhatsApp simulada localmente!", "info");
+        }
+
+        // Função para atualizar a interface com os novos pedidos
+        function updateOrdersList(newOrders) {
+            // Verificar se há novos pedidos para adicionar
+            newOrders.forEach(newOrder => {
+                // Verificar se o pedido já existe na lista atual
+                const existingOrderIndex = currentOrders.findIndex(o => o.id === newOrder.id);
+                
+                if (existingOrderIndex === -1) {
+                    // Pedido não existe, adicionar à lista
+                    currentOrders.push(newOrder);
+                    addToNotificationLog(`Novo pedido recebido de ${newOrder.nomeCliente}!`);
+                } else {
+                    // Pedido já existe, atualizar apenas se o status for diferente
+                    const existingOrder = currentOrders[existingOrderIndex];
+                    if (existingOrder.status !== newOrder.status) {
+                        const oldStatus = existingOrder.status;
+                        existingOrder.status = newOrder.status;
+                        addToNotificationLog(`Status do pedido de ${newOrder.nomeCliente} atualizado para ${newOrder.status}`);
+                        
+                        // Se o status for "Entregue" ou "Cancelado", mover para o histórico
+                        if (newOrder.status === "Entregue" || newOrder.status === "Cancelado") {
+                            // Remover do array de pedidos atuais
+                            currentOrders.splice(existingOrderIndex, 1);
+                            
+                            // Adicionar ao histórico
+                            orderHistory.push(newOrder);
+                        }
+                    }
+                }
+            });
+            
+            // Renderizar as listas atualizadas
+            renderCurrentOrders();
+            renderOrderHistory();
+        }
+
+        // Função para renderizar pedidos atuais
+        function renderCurrentOrders() {
+            const tbody = currentOrdersTable.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            // Filtrar por termo de busca
+            const searchTerm = searchInput.value.toLowerCase();
+            const filteredOrders = currentOrders.filter(order => 
+                order.nomeCliente.toLowerCase().includes(searchTerm)
+            );
+
+            if (filteredOrders.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="6" style="text-align: center;">Nenhum pedido encontrado</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+
+            filteredOrders.forEach(order => {
+                const tr = document.createElement('tr');
+                
+                // Formatar produtos para exibição
+                const produtosTexto = Array.isArray(order.produtos) 
+                    ? order.produtos.join(', ') 
+                    : order.produtos;
+                
+                // Determinar classe CSS baseada no status
+                let statusClass = '';
+                switch (order.status) {
+                    case 'Pedido Recebido':
+                        statusClass = 'status-received';
+                        break;
+                    case 'Em Preparo':
+                        statusClass = 'status-preparing';
+                        break;
+                    case 'Pronto para Entrega':
+                        statusClass = 'status-ready';
+                        break;
+                    case 'Saiu para Entrega':
+                        statusClass = 'status-delivering';
+                        break;
+                    case 'Entregue':
+                        statusClass = 'status-delivered';
+                        break;
+                    case 'Cancelado':
+                        statusClass = 'status-canceled';
+                        break;
+                }
+                
+                // Criar HTML da linha com ou sem botão de exclusão dependendo do papel do usuário
+                let actionsHtml = `<button class="action-btn details-btn" data-id="${order.id}">Detalhes</button>`;
+                
+                // Adicionar botão de exclusão apenas para administradores
+                if (userRole === 'admin') {
+                    actionsHtml += `<button class="action-btn delete-btn" data-id="${order.id}">Excluir</button>`;
+                }
+                
+                tr.innerHTML = `
+                    <td>${order.id.substring(0, 8)}</td>
+                    <td>${order.nomeCliente}</td>
+                    <td>${produtosTexto}</td>
+                    <td>R$ ${typeof order.valorTotal === 'number' ? order.valorTotal.toFixed(2) : '0.00'}</td>
+                    <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+                    <td>${actionsHtml}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+
+            // Adicionar event listeners para botões de detalhes
+            document.querySelectorAll('#currentOrdersTable .details-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-id');
+                    showOrderDetails(orderId);
+                });
+            });
+            
+            // Adicionar event listeners para botões de exclusão
+            document.querySelectorAll('#currentOrdersTable .delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-id');
+                    deleteOrder(orderId);
+                });
+            });
+        }
+
+        // Função para renderizar histórico de pedidos
+        function renderOrderHistory() {
+            const tbody = historyOrdersTable.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            // Filtrar por termo de busca
+            const searchTerm = historySearchInput.value.toLowerCase();
+            const filteredOrders = orderHistory.filter(order => 
+                order.nomeCliente.toLowerCase().includes(searchTerm)
+            );
+
+            if (filteredOrders.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="6" style="text-align: center;">Nenhum pedido encontrado no histórico</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+
+            filteredOrders.forEach(order => {
+                const tr = document.createElement('tr');
+                
+                // Formatar produtos para exibição
+                const produtosTexto = Array.isArray(order.produtos) 
+                    ? order.produtos.join(', ') 
+                    : order.produtos;
+                
+                // Determinar classe CSS baseada no status
+                let statusClass = '';
+                switch (order.status) {
+                    case 'Pedido Recebido':
+                        statusClass = 'status-received';
+                        break;
+                    case 'Em Preparo':
+                        statusClass = 'status-preparing';
+                        break;
+                    case 'Pronto para Entrega':
+                        statusClass = 'status-ready';
+                        break;
+                    case 'Saiu para Entrega':
+                        statusClass = 'status-delivering';
+                        break;
+                    case 'Entregue':
+                        statusClass = 'status-delivered';
+                        break;
+                    case 'Cancelado':
+                        statusClass = 'status-canceled';
+                        break;
+                }
+                
+                // Criar HTML da linha com ou sem botão de exclusão dependendo do papel do usuário
+                let actionsHtml = `<button class="action-btn details-btn" data-id="${order.id}">Detalhes</button>`;
+                
+                // Adicionar botão de exclusão apenas para administradores
+                if (userRole === 'admin') {
+                    actionsHtml += `<button class="action-btn delete-btn" data-id="${order.id}">Excluir</button>`;
+                }
+                
+                tr.innerHTML = `
+                    <td>${order.id.substring(0, 8)}</td>
+                    <td>${order.nomeCliente}</td>
+                    <td>${produtosTexto}</td>
+                    <td>R$ ${typeof order.valorTotal === 'number' ? order.valorTotal.toFixed(2) : '0.00'}</td>
+                    <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+                    <td>${actionsHtml}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+
+            // Adicionar event listeners para botões de detalhes
+            document.querySelectorAll('#historyOrdersTable .details-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-id');
+                    showOrderDetails(orderId, true);
+                });
+            });
+            
+            // Adicionar event listeners para botões de exclusão
+            document.querySelectorAll('#historyOrdersTable .delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-id');
+                    deleteHistoryOrder(orderId);
+                });
+            });
+        }
+
+        // Função para excluir pedido
+        function deleteOrder(orderId) {
+            // Verificar permissões - apenas admin pode excluir
+            if (userRole !== 'admin') {
+                addNotification("Permissão negada. Apenas administradores podem excluir pedidos.", "error");
+                return;
+            }
+            
+            // Confirmar exclusão
+            if (confirm("Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.")) {
+                // Encontrar índice do pedido
+                const orderIndex = currentOrders.findIndex(order => order.id === orderId);
+                
+                if (orderIndex !== -1) {
+                    // Obter informações do pedido para o log
+                    const deletedOrder = currentOrders[orderIndex];
+                    
+                    // Remover do array
+                    currentOrders.splice(orderIndex, 1);
+                    
+                    // Atualizar visualização
+                    renderCurrentOrders();
+                    
+                    // Adicionar ao log
+                    addToNotificationLog(`Pedido #${orderId.substring(0, 8)} de ${deletedOrder.nomeCliente} excluído`);
+                    
+                    // Mostrar notificação
+                    addNotification("Pedido excluído com sucesso!", "success");
+                }
+            }
+        }
+
+        // Função para excluir pedido do histórico
+        function deleteHistoryOrder(orderId) {
+            // Verificar permissões - apenas admin pode excluir
+            if (userRole !== 'admin') {
+                addNotification("Permissão negada. Apenas administradores podem excluir registros do histórico.", "error");
+                return;
+            }
+            
+            // Confirmar exclusão
+            if (confirm("Tem certeza que deseja excluir este pedido do histórico? Esta ação não pode ser desfeita.")) {
+                // Encontrar índice do pedido
+                const orderIndex = orderHistory.findIndex(order => order.id === orderId);
+                
+                if (orderIndex !== -1) {
+                    // Obter informações do pedido para o log
+                    const deletedOrder = orderHistory[orderIndex];
+                    
+                    // Remover do array
+                    orderHistory.splice(orderIndex, 1);
+                    
+                    // Atualizar visualização
+                    renderOrderHistory();
+                    
+                    // Adicionar ao log
+                    addToNotificationLog(`Pedido #${orderId.substring(0, 8)} de ${deletedOrder.nomeCliente} excluído do histórico`);
+                    
+                    // Mostrar notificação
+                    addNotification("Pedido excluído do histórico com sucesso!", "success");
+                }
+            }
+        }
+
+        // Função para mostrar detalhes do pedido
+        function showOrderDetails(orderId, isHistory = false) {
+            // Encontrar o pedido pelo ID
+            const order = isHistory 
+                ? orderHistory.find(o => o.id === orderId)
+                : currentOrders.find(o => o.id === orderId);
+            
+            if (!order) {
+                addNotification("Pedido não encontrado!", "error");
+                return;
+            }
+            
+            // Formatar produtos para exibição
+            const produtosLista = Array.isArray(order.produtos) 
+                ? order.produtos.map(p => `<li>${p}</li>`).join('') 
+                : `<li>${order.produtos}</li>`;
+            
+            // Preencher detalhes
+            orderDetails.innerHTML = `
+                <h3>Pedido #${order.id.substring(0, 8)}</h3>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Cliente:</div>
+                    <div class="detail-value">${order.nomeCliente}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Telefone:</div>
+                    <div class="detail-value">${order.telefone || 'Não informado'}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Endereço:</div>
+                    <div class="detail-value">${order.endereco || 'Não informado'}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Produtos:</div>
+                    <div class="detail-value">
+                        <ul class="products-list">
+                            ${produtosLista}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Valor Total:</div>
+                    <div class="detail-value">R$ ${typeof order.valorTotal === 'number' ? order.valorTotal.toFixed(2) : '0.00'}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Status Atual:</div>
+                    <div class="detail-value">${order.status}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Forma de Pagamento:</div>
+                    <div class="detail-value">${order.formaPagamento || 'Não informado'}</div>
+                </div>
+            `;
+            
+            // Adicionar botões de ação de status apenas para pedidos atuais (não histórico)
+            if (!isHistory) {
+                orderDetails.innerHTML += `
+                    <div class="status-actions">
+                        <button class="status-btn btn-received" data-status="Pedido Recebido">Pedido Recebido</button>
+                        <button class="status-btn btn-preparing" data-status="Em Preparo">Em Preparo</button>
+                        <button class="status-btn btn-ready" data-status="Pronto para Entrega">Pronto para Entrega</button>
+                        <button class="status-btn btn-delivering" data-status="Saiu para Entrega">Saiu para Entrega</button>
+                        <button class="status-btn btn-delivered" data-status="Entregue">Entregue</button>
+                        <button class="status-btn btn-canceled" data-status="Cancelado">Cancelado</button>
+                    </div>
+                `;
+                
+                // Adicionar event listeners para botões de status
+                setTimeout(() => {
+                    document.querySelectorAll('.status-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const newStatus = this.getAttribute('data-status');
+                            updateOrderStatus(orderId, newStatus);
+                            orderModal.style.display = 'none';
+                        });
+                    });
+                }, 100);
+            }
+            
+            // Mostrar modal
+            orderModal.style.display = 'block';
+        }
+
+        // Função para atualizar status do pedido
+        async function updateOrderStatus(orderId, newStatus) {
+            // Encontrar o pedido pelo ID
+            const order = currentOrders.find(o => o.id === orderId);
+            if (!order) {
+                addNotification("Pedido não encontrado!", "error");
+                return;
+            }
+            
+            // Guardar status antigo
+            const oldStatus = order.status;
+            
+            // Atualizar status
+            order.status = newStatus;
+            
+            // Renderizar novamente para mostrar a mudança
+            renderCurrentOrders();
+            
+            // Adicionar ao log
+            addToNotificationLog(`Status do pedido #${orderId.substring(0, 8)} atualizado de "${oldStatus}" para "${newStatus}"`);
+            
+            // Mostrar notificação
+            addNotification(`Status atualizado para "${newStatus}"!`, "success");
+            
+            // Enviar atualização para o n8n
+            await sendStatusUpdateToN8n(order, newStatus);
+            
+            // Enviar notificação WhatsApp
+            await sendWhatsAppNotification(order, oldStatus, newStatus);
+            
+            // Se o status for "Entregue" ou "Cancelado", mover para o histórico
+            if (newStatus === "Entregue" || newStatus === "Cancelado") {
+                // Remover do array de pedidos atuais
+                const orderIndex = currentOrders.findIndex(o => o.id === orderId);
+                if (orderIndex !== -1) {
+                    const removedOrder = currentOrders.splice(orderIndex, 1)[0];
+                    
+                    // Adicionar ao histórico
+                    orderHistory.push(removedOrder);
+                    
+                    // Atualizar visualização
+                    renderCurrentOrders();
+                    renderOrderHistory();
+                }
+            }
+        }
+
+        // Função para simular novo pedido
+        function simulateNewOrder() {
+            // Gerar dados aleatórios
+            const id = Date.now().toString();
+            const nomes = ['João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Lúcia', 'Fernando', 'Juliana'];
+            const sobrenomes = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Pereira', 'Costa', 'Rodrigues'];
+            const produtos = [
+                ['Açaí com morango', 'Granola extra'],
+                ['Milk-shake de chocolate', 'Calda extra'],
+                ['Açaí com banana e granola'],
+                ['Milk-shake de morango', 'Chantilly extra'],
+                ['Sorvete de pistache', 'Calda de chocolate'],
+                ['Açaí com leite condensado e paçoca'],
+                ['Milk-shake de Ovomaltine'],
+                ['Sorvete de creme com calda de caramelo']
+            ];
+            const telefones = ['(11) 98765-4321', '(21) 97654-3210', '(31) 96543-2109', '(41) 95432-1098'];
+            const enderecos = [
+                'Rua das Flores, 123',
+                'Av. Principal, 456',
+                'Rua do Comércio, 789',
+                'Av. Central, 321',
+                'Rua das Palmeiras, 654'
+            ];
+            const formasPagamento = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'PIX'];
+            
+            // Selecionar valores aleatórios
+            const nomeCliente = `${nomes[Math.floor(Math.random() * nomes.length)]} ${sobrenomes[Math.floor(Math.random() * sobrenomes.length)]}`;
+            const produtosEscolhidos = produtos[Math.floor(Math.random() * produtos.length)];
+            const telefone = telefones[Math.floor(Math.random() * telefones.length)];
+            const endereco = enderecos[Math.floor(Math.random() * enderecos.length)];
+            const valorTotal = (Math.random() * 50 + 15).toFixed(2) * 1; // Valor entre 15 e 65
+            const formaPagamento = formasPagamento[Math.floor(Math.random() * formasPagamento.length)];
+            
+            // Criar novo pedido
+            const newOrder = {
+                id,
+                nomeCliente,
+                telefone,
+                endereco,
+                produtos: produtosEscolhidos,
+                valorTotal,
+                status: 'Pedido Recebido',
+                timestamp: new Date().toISOString(),
+                formaPagamento
+            };
+            
+            // Adicionar à lista de pedidos
+            currentOrders.push(newOrder);
+            
+            // Atualizar visualização
+            renderCurrentOrders();
+            
+            // Adicionar ao log
+            addToNotificationLog(`Novo pedido simulado recebido de ${nomeCliente}`);
+            
+            // Mostrar notificação
+            addNotification(`Novo pedido simulado recebido de ${nomeCliente}!`, "success");
+            
+            // Simular notificação WhatsApp
+            simulateWhatsAppNotification(newOrder, null, 'Pedido Recebido');
+        }
+
+        // Função para adicionar botão de configuração de integração
+        function addIntegrationConfigButton() {
+            // Verificar se o botão já existe
+            if (document.querySelector('.config-button')) {
+                return;
+            }
+            
+            // Criar botão de configuração
+            const configButton = document.createElement("button");
+            configButton.innerText = "Configurar Integração";
+            configButton.className = "config-button";
+            configButton.onclick = showIntegrationConfig;
+            
+            // Adicionar ao cabeçalho
+            const header = document.querySelector(".header");
+            if (header) {
+                header.appendChild(configButton);
+            }
+        }
+
+        // Função para mostrar modal de configuração
+        function showIntegrationConfig() {
+            // Criar modal
+            const modal = document.createElement("div");
+            modal.className = "modal";
+            modal.id = "configModal";
+            
+            // Conteúdo do modal
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Configuração de Integração com n8n</h2>
+                    <form id="integrationConfigForm">
+                        <div class="form-group">
+                            <label for="getOrdersUrl">URL para Buscar Pedidos:</label>
+                            <input type="text" id="getOrdersUrl" value="${config.getOrdersUrl}" />
+                            <small>Exemplo: https://seu-n8n.com/api/pedidos/get-orders</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="notifyUrl">URL para Enviar Notificações:</label>
+                            <input type="text" id="notifyUrl" value="${config.notifyUrl}" />
+                            <small>Exemplo: https://seu-n8n.com/api/pedidos/notificar</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="updateStatusUrl">URL para Atualizar Status:</label>
+                            <input type="text" id="updateStatusUrl" value="${config.updateStatusUrl}" />
+                            <small>Exemplo: https://seu-n8n.com/api/pedidos/update-status</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="apiKey">Chave de API:</label>
+                            <input type="text" id="apiKey" value="${config.apiKey}" />
+                            <small>Deixe em branco se não estiver usando autenticação</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="updateInterval">Intervalo de Atualização (segundos):</label>
+                            <input type="number" id="updateInterval" value="${config.updateInterval / 1000}" min="5" />
+                            <small>Tempo entre atualizações automáticas (mínimo 5 segundos)</small>
+                        </div>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                        <div id="testConnectionResult" class="integration-status" style="display: none;"></div>
+                        <button type="button" id="testConnectionBtn" class="btn-primary" style="margin-top: 10px; background-color: var(--info-color);">Testar Conexão</button>
+                    </form>
+                </div>
+            `;
+            
+            // Adicionar modal ao corpo do documento
+            document.body.appendChild(modal);
+            
+            // Mostrar modal
+            modal.style.display = "block";
+            
+            // Configurar evento de fechamento
+            const closeBtn = modal.querySelector(".close");
+            closeBtn.onclick = function() {
+                modal.style.display = "none";
+                modal.remove();
+            };
+            
+            // Configurar evento de teste de conexão
+            const testBtn = document.getElementById("testConnectionBtn");
+            testBtn.onclick = async function() {
+                const resultDiv = document.getElementById("testConnectionResult");
+                resultDiv.style.display = "block";
+                resultDiv.className = "integration-status";
+                resultDiv.textContent = "Testando conexão...";
+                
+                try {
+                    const getOrdersUrl = document.getElementById("getOrdersUrl").value;
+                    
+                    const response = await fetch(getOrdersUrl, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": document.getElementById("apiKey").value ? 
+                                `Bearer ${document.getElementById("apiKey").value}` : undefined
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        resultDiv.className = "integration-status success";
+                        resultDiv.textContent = "Conexão bem-sucedida! O servidor respondeu corretamente.";
+                    } else {
+                        resultDiv.className = "integration-status error";
+                        resultDiv.textContent = `Erro na conexão: ${response.status} ${response.statusText}`;
+                    }
+                } catch (error) {
+                    resultDiv.className = "integration-status error";
+                    resultDiv.textContent = `Erro na conexão: ${error.message}`;
+                }
+            };
+            
+            // Configurar evento de envio do formulário
+            const form = document.getElementById("integrationConfigForm");
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                
+                // Atualizar configurações
+                config.getOrdersUrl = document.getElementById("getOrdersUrl").value;
+                config.notifyUrl = document.getElementById("notifyUrl").value;
+                config.updateStatusUrl = document.getElementById("updateStatusUrl").value;
+                config.apiKey = document.getElementById("apiKey").value;
+                
+                const updateIntervalValue = parseInt(document.getElementById("updateInterval").value);
+                config.updateInterval = Math.max(5, updateIntervalValue) * 1000; // Mínimo de 5 segundos
+                
+                // Salvar configurações no localStorage
+                localStorage.setItem("n8nIntegrationConfig", JSON.stringify(config));
+                
+                // Atualizar intervalo de atualização automática
+                setupAutoRefresh();
+                
+                // Fechar modal
+                modal.style.display = "none";
+                modal.remove();
+                
+                // Notificar usuário
+                addNotification("Configurações de integração salvas com sucesso!");
+                
+                // Buscar pedidos com as novas configurações
+                fetchOrdersFromN8n();
+            };
+        }
+
+        // Função para carregar configurações salvas
+        function loadSavedConfig() {
+            const savedConfig = localStorage.getItem("n8nIntegrationConfig");
+            if (savedConfig) {
+                try {
+                    const parsedConfig = JSON.parse(savedConfig);
+                    
+                    // Verificar e atualizar cada propriedade individualmente
+                    if (parsedConfig.getOrdersUrl) config.getOrdersUrl = parsedConfig.getOrdersUrl;
+                    if (parsedConfig.notifyUrl) config.notifyUrl = parsedConfig.notifyUrl;
+                    if (parsedConfig.updateStatusUrl) config.updateStatusUrl = parsedConfig.updateStatusUrl;
+                    if (parsedConfig.apiKey !== undefined) config.apiKey = parsedConfig.apiKey;
+                    if (parsedConfig.updateInterval) config.updateInterval = parsedConfig.updateInterval;
+                    
+                    addNotification("Configurações de integração carregadas do armazenamento local.");
+                } catch (error) {
+                    console.error("Erro ao carregar configurações:", error);
+                    addToNotificationLog(`Erro ao carregar configurações: ${error.message}`);
+                }
+            }
+        }
+
+        // Função para configurar atualização automática
+        function setupAutoRefresh() {
+            // Limpar intervalo existente
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+            
+            // Obter valor do select
+            const interval = parseInt(autoRefreshSelect.value);
+            
+            // Se o intervalo for maior que 0, configurar atualização automática
+            if (interval > 0) {
+                autoRefreshInterval = setInterval(() => {
+                    fetchOrdersFromN8n();
+                }, interval * 1000);
+                
+                addToNotificationLog(`Atualização automática configurada para cada ${interval} segundos`);
+            } else {
+                addToNotificationLog("Atualização automática desativada");
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                const user = checkLogin(username, password);
+                
+                if (user) {
+                    // Login bem-sucedido
+                    currentUser = user.username;
+                    userRole = user.role;
+                    userDisplay.textContent = `Usuário: ${user.displayName}`;
+                    
+                    // Esconder tela de login e mostrar tela principal
+                    loginScreen.style.display = 'none';
+                    mainScreen.style.display = 'block';
+                    
+                    // Carregar configurações salvas
+                    loadSavedConfig();
+                    
+                    // Adicionar botão de configuração
+                    addIntegrationConfigButton();
+                    
+                    // Buscar pedidos iniciais
+                    fetchOrdersFromN8n();
+                    
+                    // Configurar atualização automática
+                    setupAutoRefresh();
+                    
+                    // Adicionar ao log
+                    addToNotificationLog(`Login bem-sucedido como ${user.displayName}`);
+                } else {
+                    // Login falhou
+                    loginError.textContent = 'Usuário ou senha incorretos!';
+                }
+            });
+            
+            // Logout button
+            logoutBtn.addEventListener('click', function() {
+                // Limpar intervalo de atualização automática
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+                
+                // Resetar variáveis
+                currentUser = null;
+                userRole = null;
+                currentOrders = [];
+                orderHistory = [];
+                
+                // Mostrar tela de login e esconder tela principal
+                mainScreen.style.display = 'none';
+                loginScreen.style.display = 'block';
+                
+                // Limpar campos de login
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                loginError.textContent = '';
+            });
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remover classe active de todas as abas
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Adicionar classe active à aba clicada
+                    this.classList.add('active');
+                    
+                    // Esconder todos os conteúdos de aba
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Mostrar conteúdo da aba selecionada
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Refresh button
+            refreshBtn.addEventListener('click', function() {
+                fetchOrdersFromN8n();
+            });
+            
+            // Auto-refresh interval change
+            autoRefreshSelect.addEventListener('change', function() {
+                setupAutoRefresh();
+            });
+            
+            // Search buttons
+            searchBtn.addEventListener('click', function() {
+                renderCurrentOrders();
+            });
+            
+            historySearchBtn.addEventListener('click', function() {
+                renderOrderHistory();
+            });
+            
+            // Search input enter key
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    renderCurrentOrders();
+                }
+            });
+            
+            historySearchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    renderOrderHistory();
+                }
+            });
+            
+            // Close modal
+            closeModalBtn.addEventListener('click', function() {
+                orderModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === orderModal) {
+                    orderModal.style.display = 'none';
+                }
+            });
+            
+            // Simulate order button
+            simulateOrderBtn.addEventListener('click', function() {
+                simulateNewOrder();
+            });
+        });
+    </script>
+</body>
+</html>
