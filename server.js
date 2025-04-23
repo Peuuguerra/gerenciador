@@ -1,3 +1,5 @@
+// Versão modificada do server.js para resolver o problema no Render.com
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -11,6 +13,107 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Garantir que os diretórios necessários existam
+const publicDir = path.join(__dirname, 'public');
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
+
+// Criar um index.html básico se não existir
+const indexPath = path.join(publicDir, 'index.html');
+if (!fs.existsSync(indexPath)) {
+  const basicHtml = `<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr. Shake - Gerenciamento de Pedidos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #8A2BE2;
+            text-align: center;
+        }
+        .status {
+            padding: 10px;
+            background-color: #e2f0ff;
+            border-radius: 4px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .api-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .endpoint {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .method {
+            font-weight: bold;
+            color: #8A2BE2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mr. Shake - Sistema de Gerenciamento de Pedidos</h1>
+        
+        <div class="status">
+            <p>✅ API está funcionando corretamente</p>
+        </div>
+        
+        <div class="api-info">
+            <h2>Endpoints disponíveis:</h2>
+            
+            <div class="endpoint">
+                <p><span class="method">GET</span> /api/pedidos/get-orders</p>
+                <p>Retorna todos os pedidos cadastrados</p>
+            </div>
+            
+            <div class="endpoint">
+                <p><span class="method">POST</span> /api/pedidos/get-orders</p>
+                <p>Adiciona um novo pedido</p>
+            </div>
+            
+            <div class="endpoint">
+                <p><span class="method">POST</span> /api/pedidos/update-status</p>
+                <p>Atualiza o status de um pedido</p>
+            </div>
+            
+            <div class="endpoint">
+                <p><span class="method">POST</span> /api/pedidos/notificar</p>
+                <p>Envia notificação sobre um pedido</p>
+            </div>
+            
+            <div class="endpoint">
+                <p><span class="method">GET</span> /ping</p>
+                <p>Verifica se o servidor está online</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>`;
+  fs.writeFileSync(indexPath, basicHtml);
+}
 
 // Diretório para armazenar os pedidos
 const dataDir = path.join(__dirname, 'data');
@@ -196,6 +299,11 @@ app.post('/api/pedidos/notificar', (req, res) => {
     console.error('Erro ao enviar notificação:', error);
     res.status(500).json({ error: 'Erro ao enviar notificação' });
   }
+});
+
+// Rota para verificar se o servidor está online (útil para pings de monitoramento)
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
 });
 
 // Rota para servir o arquivo HTML principal
