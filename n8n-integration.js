@@ -1,4 +1,4 @@
-// Arquivo para configurar a integração com n8n
+// Arquivo para configurar a integração com n8n no Render.com
 // Este arquivo deve ser incluído no seu projeto para facilitar a integração
 
 // Configurações para integração com n8n
