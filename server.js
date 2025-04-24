@@ -1050,7 +1050,7 @@ app.get('/', (req, res) => {
                     
                     // Adicionar classe active à aba clicada
                     tab.classList.add('active');
-                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                    document.getElementById(tabId + 'Tab').classList.add('active');
                 });
             });
         }
@@ -1140,7 +1140,7 @@ app.get('/', (req, res) => {
             
             if (ordersToRender.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = \`<td colspan="8" style="text-align: center;">Nenhum pedido encontrado</td>\`;
+                row.innerHTML = '<td colspan="8" style="text-align: center;">Nenhum pedido encontrado</td>';
                 ordersTableBody.appendChild(row);
                 return;
             }
@@ -1152,21 +1152,20 @@ app.get('/', (req, res) => {
                 const row = document.createElement('tr');
                 
                 const formattedDate = new Date(order.timestamp).toLocaleString('pt-BR');
-                const formattedValue = \`R$ \${order.valorTotal.toFixed(2)}\`;
+                const formattedValue = 'R$ ' + order.valorTotal.toFixed(2);
                 const statusClass = getStatusClass(order.status);
                 
-                row.innerHTML = \`
-                    <td>\${order.id.substring(0, 8)}</td>
-                    <td>\${order.nomeCliente}</td>
-                    <td>\${order.telefone}</td>
-                    <td>\${order.produtos.join(', ')}</td>
-                    <td>\${formattedValue}</td>
-                    <td><span class="status-badge \${statusClass}">\${order.status}</span></td>
-                    <td>\${formattedDate}</td>
-                    <td>
-                        <button class="action-btn details-btn" data-id="\${order.id}">Detalhes</button>
-                    </td>
-                \`;
+                row.innerHTML = 
+                    '<td>' + order.id.substring(0, 8) + '</td>' +
+                    '<td>' + order.nomeCliente + '</td>' +
+                    '<td>' + order.telefone + '</td>' +
+                    '<td>' + order.produtos.join(', ') + '</td>' +
+                    '<td>' + formattedValue + '</td>' +
+                    '<td><span class="status-badge ' + statusClass + '">' + order.status + '</span></td>' +
+                    '<td>' + formattedDate + '</td>' +
+                    '<td>' +
+                        '<button class="action-btn details-btn" data-id="' + order.id + '">Detalhes</button>' +
+                    '</td>';
                 
                 ordersTableBody.appendChild(row);
                 
@@ -1210,65 +1209,63 @@ app.get('/', (req, res) => {
 
         // Mostrar detalhes do pedido
         function showOrderDetails(order) {
-            orderDetailsContent.innerHTML = \`
-                <h3>Pedido #\${order.id.substring(0, 8)}</h3>
+            orderDetailsContent.innerHTML = 
+                '<h3>Pedido #' + order.id.substring(0, 8) + '</h3>' +
                 
-                <div class="detail-row">
-                    <div class="detail-label">Cliente:</div>
-                    <div class="detail-value">\${order.nomeCliente}</div>
-                </div>
+                '<div class="detail-row">' +
+                    '<div class="detail-label">Cliente:</div>' +
+                    '<div class="detail-value">' + order.nomeCliente + '</div>' +
+                '</div>' +
                 
-                <div class="detail-row">
-                    <div class="detail-label">Telefone:</div>
-                    <div class="detail-value">\${order.telefone}</div>
-                </div>
+                '<div class="detail-row">' +
+                    '<div class="detail-label">Telefone:</div>' +
+                    '<div class="detail-value">' + order.telefone + '</div>' +
+                '</div>' +
                 
-                <div class="detail-row">
-                    <div class="detail-label">Endereço:</div>
-                    <div class="detail-value">\${order.endereco || 'Não informado'}</div>
-                </div>
+                '<div class="detail-row">' +
+                    '<div class="detail-label">Endereço:</div>' +
+                    '<div class="detail-value">' + (order.endereco || 'Não informado') + '</div>' +
+                '</div>' +
                 
-                <div class="detail-row">
-                    <div class="detail-label">Produtos:</div>
-                    <div class="detail-value">
-                        <ul class="products-list">
-                            \${order.produtos.map(p => \`<li>\${p}</li>\`).join('')}
-                        </ul>
-                    </div>
-                </div>
+                '<div class="detail-row">' +
+                    '<div class="detail-label">Produtos:</div>' +
+                    '<div class="detail-value">' +
+                        '<ul class="products-list">' +
+                            order.produtos.map(p => '<li>' + p + '</li>').join('') +
+                        '</ul>' +
+                    '</div>' +
+                '</div>' +
                 
-                <div class="detail-row">
-                    <div class="detail-label">Valor Total:</div>
-                    <div class="detail-value">R$ \${order.valorTotal.toFixed(2)}</div>
-                </div>
+                '<div class="detail-row">' +
+                    '<div class="detail-label">Valor Total:</div>' +
+                    '<div class="detail-value">R$ ' + order.valorTotal.toFixed(2) + '</div>' +
+                '</div>' +
                 
-                <div class="detail-row">
-                    <div class="detail-label">Forma de Pagamento:</div>
-                    <div class="detail-value">\${order.formaPagamento || 'Não informado'}</div>
-                </div>
+                '<div class="detail-row">' +
+                    '<div class="detail-label">Forma de Pagamento:</div>' +
+                    '<div class="detail-value">' + (order.formaPagamento || 'Não informado') + '</div>' +
+                '</div>' +
                 
-                <div class="detail-row">
-                    <div class="detail-label">Status Atual:</div>
-                    <div class="detail-value">
-                        <span class="status-badge \${getStatusClass(order.status)}">\${order.status}</span>
-                    </div>
-                </div>
+                '<div class="detail-row">' +
+                    '<div class="detail-label">Status Atual:</div>' +
+                    '<div class="detail-value">' +
+                        '<span class="status-badge ' + getStatusClass(order.status) + '">' + order.status + '</span>' +
+                    '</div>' +
+                '</div>' +
                 
-                <div class="detail-row">
-                    <div class="detail-label">Data/Hora:</div>
-                    <div class="detail-value">\${new Date(order.timestamp).toLocaleString('pt-BR')}</div>
-                </div>
-            \`;
+                '<div class="detail-row">' +
+                    '<div class="detail-label">Data/Hora:</div>' +
+                    '<div class="detail-value">' + new Date(order.timestamp).toLocaleString('pt-BR') + '</div>' +
+                '</div>';
             
             // Configurar botões de status
-            statusActionsContent.innerHTML = \`
-                <button class="status-btn btn-received" data-status="Pedido Recebido" data-id="\${order.id}">Pedido Recebido</button>
-                <button class="status-btn btn-preparing" data-status="Em Preparo" data-id="\${order.id}">Em Preparo</button>
-                <button class="status-btn btn-ready" data-status="Pronto para Entrega" data-id="\${order.id}">Pronto para Entrega</button>
-                <button class="status-btn btn-delivering" data-status="Saiu para Entrega" data-id="\${order.id}">Saiu para Entrega</button>
-                <button class="status-btn btn-delivered" data-status="Entregue" data-id="\${order.id}">Entregue</button>
-                <button class="status-btn btn-canceled" data-status="Cancelado" data-id="\${order.id}">Cancelado</button>
-            \`;
+            statusActionsContent.innerHTML = 
+                '<button class="status-btn btn-received" data-status="Pedido Recebido" data-id="' + order.id + '">Pedido Recebido</button>' +
+                '<button class="status-btn btn-preparing" data-status="Em Preparo" data-id="' + order.id + '">Em Preparo</button>' +
+                '<button class="status-btn btn-ready" data-status="Pronto para Entrega" data-id="' + order.id + '">Pronto para Entrega</button>' +
+                '<button class="status-btn btn-delivering" data-status="Saiu para Entrega" data-id="' + order.id + '">Saiu para Entrega</button>' +
+                '<button class="status-btn btn-delivered" data-status="Entregue" data-id="' + order.id + '">Entregue</button>' +
+                '<button class="status-btn btn-canceled" data-status="Cancelado" data-id="' + order.id + '">Cancelado</button>';
             
             // Adicionar event listeners para os botões de status
             const statusButtons = statusActionsContent.querySelectorAll('.status-btn');
@@ -1298,7 +1295,7 @@ app.get('/', (req, res) => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showNotification(\`Status atualizado para: \${newStatus}\`, 'success');
+                    showNotification('Status atualizado para: ' + newStatus, 'success');
                     
                     // Atualizar pedido na lista local
                     const orderIndex = orders.findIndex(o => o.id === orderId);
@@ -1341,7 +1338,7 @@ app.get('/', (req, res) => {
             .then(data => {
                 if (data.success) {
                     // Adicionar ao log de notificações
-                    addToNotificationLog(\`Notificação enviada para \${telefone}: "\${data.mensagem}"\`);
+                    addToNotificationLog('Notificação enviada para ' + telefone + ': "' + data.mensagem + '"');
                 }
             })
             .catch(error => {
@@ -1370,7 +1367,7 @@ app.get('/', (req, res) => {
                 })
                 .then(response => {
                     if (response.ok) {
-                        addToNotificationLog(\`Notificação enviada para n8n: Atualização de status para \${newStatus}\`);
+                        addToNotificationLog('Notificação enviada para n8n: Atualização de status para ' + newStatus);
                     }
                 })
                 .catch(error => {
@@ -1417,7 +1414,7 @@ app.get('/', (req, res) => {
                         })
                         .then(response => {
                             if (response.ok) {
-                                addToNotificationLog(\`Notificação enviada para n8n: Novo pedido de teste\`);
+                                addToNotificationLog('Notificação enviada para n8n: Novo pedido de teste');
                             }
                         })
                         .catch(error => {
@@ -1448,7 +1445,7 @@ app.get('/', (req, res) => {
             const randomName = names[Math.floor(Math.random() * names.length)];
             
             // Gerar número de telefone aleatório
-            const randomPhone = \`11\${Math.floor(Math.random() * 90000000) + 10000000}\`;
+            const randomPhone = '11' + (Math.floor(Math.random() * 90000000) + 10000000);
             
             // Gerar endereço aleatório
             const streets = ['Rua das Flores', 'Av. Paulista', 'Rua Augusta', 'Av. Brasil', 'Rua dos Pinheiros'];
@@ -1456,10 +1453,10 @@ app.get('/', (req, res) => {
             const randomNumber = Math.floor(Math.random() * 1000) + 1;
             
             const whatsappOrder = {
-                Cliente: \`\${randomName} (WhatsApp)\`,
+                Cliente: randomName + ' (WhatsApp)',
                 Telefone: randomPhone,
-                Endereço: \`\${randomStreet}, \${randomNumber}\`,
-                Produtos: \`Milk Shake de \${randomFlavor} \${randomSize} \${randomExtra}\`,
+                Endereço: randomStreet + ', ' + randomNumber,
+                Produtos: 'Milk Shake de ' + randomFlavor + ' ' + randomSize + ' ' + randomExtra,
                 "Forma de Pagamento": Math.random() > 0.5 ? "Dinheiro" : "Cartão de Crédito"
             };
             
@@ -1492,7 +1489,7 @@ app.get('/', (req, res) => {
                         })
                         .then(response => {
                             if (response.ok) {
-                                addToNotificationLog(\`Notificação enviada para n8n: Novo pedido via WhatsApp\`);
+                                addToNotificationLog('Notificação enviada para n8n: Novo pedido via WhatsApp');
                             }
                         })
                         .catch(error => {
@@ -1512,7 +1509,7 @@ app.get('/', (req, res) => {
         // Mostrar notificação
         function showNotification(message, type = '') {
             const notification = document.createElement('div');
-            notification.className = \`notification \${type}\`;
+            notification.className = 'notification ' + type;
             notification.textContent = message;
             
             notificationContainer.appendChild(notification);
@@ -1553,10 +1550,9 @@ app.get('/', (req, res) => {
                 const logEntry = document.createElement('div');
                 logEntry.className = 'log-entry';
                 
-                logEntry.innerHTML = \`
-                    <div class="log-time">\${entry.time}</div>
-                    <div class="log-message">\${entry.message}</div>
-                \`;
+                logEntry.innerHTML = 
+                    '<div class="log-time">' + entry.time + '</div>' +
+                    '<div class="log-message">' + entry.message + '</div>';
                 
                 notificationLogElement.appendChild(logEntry);
             });
