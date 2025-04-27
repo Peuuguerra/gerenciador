@@ -13,14 +13,18 @@ app.use(cors()); // Habilitar CORS para todas as origens (ajustar em produção 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// **NOVA CONFIGURAÇÃO:** Confiar no primeiro proxy (importante para Render, Heroku, etc.)
+app.set('trust proxy', 1);
+
 // Configuração da Sessão
-const isProduction = process.env.NODE_ENV === "production";
+// const isProduction = process.env.NODE_ENV === "production"; // Temporariamente comentado
 app.use(session({
-  secret: "seu_segredo_super_secreto_troque_isso", // !! IMPORTANTE: Troque por uma chave secreta forte e única
+  secret: "seu_segredo_super_secreto_troque_isso_agora", // !! IMPORTANTE: Troque por uma chave secreta forte e única
   resave: false,
   saveUninitialized: false, // Não salva sessões não inicializadas
   cookie: {
-    secure: isProduction, // Usar cookies seguros SOMENTE em produção (HTTPS)
+    // **MODIFICADO:** Forçar secure: false para teste, ignorando NODE_ENV por enquanto
+    secure: false, 
     httpOnly: true, // Ajuda a prevenir ataques XSS
     maxAge: 1000 * 60 * 60 * 24 // Tempo de vida do cookie (ex: 24 horas)
     // sameSite: 'lax' // Pode adicionar para proteção CSRF, mas teste se não quebra nada
@@ -343,7 +347,6 @@ app.get("*/", (req, res) => {
 // Iniciar o servidor
 app.listen(PORT, () => {
   console.log(`Servidor Mr. Shake rodando na porta ${PORT}`);
-  if (!isProduction) {
-    console.warn("AVISO: Rodando em modo de desenvolvimento (cookie.secure=false).");
-  }
+  // Aviso sobre cookie não seguro (para lembrar de mudar em produção)
+  console.warn("AVISO: Cookie de sessão configurado como secure: false para teste. Mude para secure: true em produção com HTTPS.");
 });
