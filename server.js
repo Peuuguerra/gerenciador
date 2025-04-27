@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
 const session = require("express-session"); // Importar express-session
-const n8nIntegration = require("./n8n-integration"); // **ADICIONADO:** Importar módulo de integração n8n
+const n8nIntegration = require("./n8n-integration"); // Importar módulo de integração n8n
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,21 +14,18 @@ app.use(cors()); // Habilitar CORS para todas as origens (ajustar em produção 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// **NOVA CONFIGURAÇÃO:** Confiar no primeiro proxy (importante para Render, Heroku, etc.)
+// Confiar no primeiro proxy (importante para Render, Heroku, etc.)
 app.set("trust proxy", 1);
 
 // Configuração da Sessão
-// const isProduction = process.env.NODE_ENV === "production"; // Temporariamente comentado
 app.use(session({
   secret: "seu_segredo_super_secreto_troque_isso_agora", // !! IMPORTANTE: Troque por uma chave secreta forte e única
   resave: false,
   saveUninitialized: false, // Não salva sessões não inicializadas
   cookie: {
-    // **MODIFICADO:** Forçar secure: false para teste, ignorando NODE_ENV por enquanto
-    secure: false,
+    secure: false, // Forçar secure: false para teste
     httpOnly: true, // Ajuda a prevenir ataques XSS
     maxAge: 1000 * 60 * 60 * 24, // Tempo de vida do cookie (ex: 24 horas)
-    // sameSite: 'lax' // Pode adicionar para proteção CSRF, mas teste se não quebra nada
   },
 }));
 
@@ -38,7 +35,6 @@ if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
 
-// Diretório para armazenar os dados
 const dataDir = path.join(__dirname, "data");
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -52,7 +48,7 @@ if (!fs.existsSync(pedidosFile)) {
   fs.writeFileSync(pedidosFile, JSON.stringify([]));
 }
 
-// Credenciais de Usuário (em um cenário real, use um banco de dados)
+// Credenciais de Usuário
 const users = {
   admin: { password: "admin123", role: "admin" },
   funcionario: { password: "funcionario123", role: "funcionario" },
@@ -63,10 +59,10 @@ function generateOrderId() {
   return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
 }
 
-// Middleware de Autenticação - Verifica se o usuário está logado
+// Middleware de Autenticação
 function requireLogin(req, res, next) {
   if (req.session && req.session.user) {
-    return next(); // Usuário está logado, continua
+    return next();
   } else {
     console.warn("Tentativa de acesso não autorizado (sem sessão):");
     return res
@@ -75,18 +71,16 @@ function requireLogin(req, res, next) {
   }
 }
 
-// Middleware de Autorização - Verifica se o usuário tem a função de admin
+// Middleware de Autorização Admin
 function requireAdmin(req, res, next) {
-  // Primeiro, verifica se está logado
   if (!req.session || !req.session.user) {
     console.warn("Tentativa de acesso admin não autorizado (sem sessão):");
     return res
       .status(401)
       .json({ error: "Acesso não autorizado. Faça login primeiro." });
   }
-  // Depois, verifica a role
   if (req.session.user.role === "admin") {
-    return next(); // Usuário é admin, continua
+    return next();
   } else {
     console.warn(
       `Tentativa de acesso admin não autorizado (usuário: ${req.session.user.username}, role: ${req.session.user.role}):`
@@ -105,12 +99,10 @@ app.post("/login", (req, res) => {
   const user = users[username];
 
   if (user && user.password === password) {
-    // Credenciais corretas - Inicia a sessão
     req.session.user = {
       username: username,
       role: user.role,
     };
-    // Garante que a sessão seja salva antes de responder
     req.session.save((err) => {
       if (err) {
         console.error("Erro ao salvar sessão após login:", err);
@@ -128,7 +120,6 @@ app.post("/login", (req, res) => {
       });
     });
   } else {
-    // Credenciais inválidas
     console.log(`Tentativa de login falhou para o usuário: ${username}`);
     res.status(401).json({ success: false, message: "Usuário ou senha inválidos." });
   }
@@ -144,7 +135,7 @@ app.get("/logout", (req, res) => {
         console.error("Erro ao destruir sessão:", err);
         return res.status(500).json({ error: "Erro ao fazer logout." });
       }
-      res.clearCookie("connect.sid"); // Limpa o cookie da sessão (o nome padrão é connect.sid)
+      res.clearCookie("connect.sid");
       console.log(`Usuário ${username} deslogado. Sessão ID: ${sessionId}`);
       res.json({ success: true, message: "Logout bem-sucedido!" });
     });
@@ -156,15 +147,13 @@ app.get("/logout", (req, res) => {
 // Rota para verificar status da sessão (GET)
 app.get("/session", (req, res) => {
   if (req.session && req.session.user) {
-    // console.log("Verificando sessão - Usuário logado:", req.session.user.username, "Sessão ID:", req.sessionID);
     res.json({ loggedIn: true, user: req.session.user });
   } else {
-    // console.log("Verificando sessão - Nenhum usuário logado. Sessão ID:", req.sessionID);
     res.json({ loggedIn: false });
   }
 });
 
-// --- Rotas da API de Pedidos (Protegidas e Não Protegidas) ---
+// --- Rotas da API de Pedidos ---
 
 // Rota para obter todos os pedidos (GET) - Protegida por Login
 app.get("/api/pedidos/get-orders", requireLogin, (req, res) => {
@@ -178,33 +167,62 @@ app.get("/api/pedidos/get-orders", requireLogin, (req, res) => {
   }
 });
 
-// Rota para adicionar um novo pedido (POST) - Não protegida, pois pode vir de sistema externo
+// **NOVO:** Função para comparar arrays de produtos (ignora ordem)
+function compareProductArrays(arr1, arr2) {
+    if (!arr1 || !arr2 || arr1.length !== arr2.length) {
+        return false;
+    }
+    const sortedArr1 = [...arr1].sort();
+    const sortedArr2 = [...arr2].sort();
+    return sortedArr1.every((value, index) => value === sortedArr2[index]);
+}
+
+// Rota para adicionar um novo pedido (POST) - Não protegida
 app.post("/api/pedidos/get-orders", (req, res) => {
   try {
     console.log("Recebido pedido:", req.body);
     const data = fs.readFileSync(pedidosFile, "utf8");
     const pedidos = JSON.parse(data);
     
-    // **MODIFICADO:** Usar valores vazios se não forem enviados
+    // Usar valores vazios para TODOS os campos se não forem enviados
     const Cliente = req.body.Cliente || ""; 
     const Telefone = req.body.Telefone || "";
-    const Endereco = req.body.Endereço || ""; // Usar string vazia se não houver Endereço
-    const ProdutosInput = req.body.Produtos; // Pega o input de produtos
+    const Endereco = req.body.Endereço || ""; 
+    const ProdutosInput = req.body.Produtos;
     const formaPagamento = req.body["Forma de Pagamento"] || "";
 
-    // **MODIFICADO:** Tratar ProdutosInput para ser array vazio se não houver input
+    // Tratar ProdutosInput para ser array vazio se não houver input ou for vazio
     let produtosArray = [];
-    if (ProdutosInput) {
+    if (ProdutosInput && ProdutosInput.length > 0) {
         produtosArray = Array.isArray(ProdutosInput) ? ProdutosInput : [ProdutosInput];
     }
+
+    // **NOVO:** Verificação de Duplicidade (Telefone + Produtos nos últimos 5 minutos)
+    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+    const potentialDuplicate = pedidos.find(p => 
+        p.telefone === Telefone &&
+        compareProductArrays(p.produtos, produtosArray) && // Compara arrays de produtos
+        new Date(p.timestamp).getTime() > fiveMinutesAgo
+    );
+
+    if (potentialDuplicate) {
+        console.warn(`Pedido potencialmente duplicado detectado (Telefone: ${Telefone}, Produtos: ${JSON.stringify(produtosArray)}). Pedido original ID: ${potentialDuplicate.id}. Ignorando novo pedido.`);
+        // Retorna sucesso para não causar erro na origem, mas não salva nem notifica
+        return res.status(200).json({
+            success: true,
+            message: "Pedido potencialmente duplicado detectado e ignorado.",
+            pedido_existente_id: potentialDuplicate.id
+        });
+    }
+    // Fim da verificação de duplicidade
 
     const novoPedido = {
       id: generateOrderId(),
       nomeCliente: Cliente,
       telefone: Telefone,
-      endereco: Endereco, // Salva string vazia se não veio
-      produtos: produtosArray, // Salva array vazio se não veio
-      valorTotal: calcularValorTotal(produtosArray), // Calcula com base no array (que pode estar vazio)
+      endereco: Endereco,
+      produtos: produtosArray,
+      valorTotal: calcularValorTotal(produtosArray),
       status: "Pedido Recebido",
       timestamp: new Date().toISOString(),
       formaPagamento: formaPagamento,
@@ -221,10 +239,10 @@ app.post("/api/pedidos/get-orders", (req, res) => {
     n8nIntegration
       .notificarNovoPedido(novoPedido)
       .then((response) => {
-        console.log("Notificação de novo pedido enviada para n8n com sucesso");
+        // console.log("Notificação de novo pedido enviada para n8n com sucesso");
       })
       .catch((error) => {
-        console.error("Erro ao notificar n8n sobre novo pedido:", error);
+        // console.error("Erro ao notificar n8n sobre novo pedido:", error);
       });
 
     res.status(201).json({
@@ -238,33 +256,27 @@ app.post("/api/pedidos/get-orders", (req, res) => {
   }
 });
 
-// Função simples para calcular valor total baseado na descrição do produto
-function calcularValorTotal(produtosArray) { // **MODIFICADO:** Recebe o array diretamente
-  let valor = 15.0; // Valor base, ajustar se necessário
-  // Se o array estiver vazio, retorna o valor base
+// Função para calcular valor total
+function calcularValorTotal(produtosArray) {
+  let valor = 15.0;
   if (!produtosArray || produtosArray.length === 0) {
       return parseFloat(valor.toFixed(2));
   }
-  
   produtosArray.forEach((produto) => {
     if (typeof produto === "string") {
-      // Garante que é string
       const lowerProduto = produto.toLowerCase();
       if (lowerProduto.includes("g")) valor += 5.0;
       else if (lowerProduto.includes("m")) valor += 3.0;
-      // Se não for G nem M, assume P (sem custo extra)
-
       if (lowerProduto.includes("leite condensado")) valor += 2.0;
       if (lowerProduto.includes("morango")) valor += 2.0;
       if (lowerProduto.includes("banana")) valor += 1.5;
       if (lowerProduto.includes("granola")) valor += 1.0;
-      // Adicionar mais adicionais aqui se necessário
     }
   });
   return parseFloat(valor.toFixed(2));
 }
 
-// Rota para atualizar status de um pedido - Protegida por Login
+// Rota para atualizar status - Protegida por Login
 app.post("/api/pedidos/update-status", requireLogin, (req, res) => {
   try {
     const { orderId, newStatus } = req.body;
@@ -282,12 +294,10 @@ app.post("/api/pedidos/update-status", requireLogin, (req, res) => {
       n8nIntegration
         .notificarAtualizacaoStatus(pedidos[pedidoIndex], oldStatus, newStatus)
         .then((response) => {
-          console.log(
-            "Notificação de atualização enviada para n8n com sucesso"
-          );
+          // console.log("Notificação de atualização enviada para n8n com sucesso");
         })
         .catch((error) => {
-          console.error("Erro ao notificar n8n sobre atualização:", error);
+          // console.error("Erro ao notificar n8n sobre atualização:", error);
         });
 
       res.json({
@@ -315,7 +325,7 @@ app.delete("/api/pedidos/:orderId", requireAdmin, (req, res) => {
     const pedidoIndex = pedidos.findIndex((p) => p.id === orderId);
 
     if (pedidoIndex !== -1) {
-      const pedidoRemovido = pedidos.splice(pedidoIndex, 1)[0]; // Remove o pedido
+      const pedidoRemovido = pedidos.splice(pedidoIndex, 1)[0];
       fs.writeFileSync(pedidosFile, JSON.stringify(pedidos, null, 2));
       const logMessage = `[${new Date().toISOString()}] Pedido removido por ${req.session.user.username}: ${JSON.stringify(
         pedidoRemovido
@@ -336,7 +346,7 @@ app.delete("/api/pedidos/:orderId", requireAdmin, (req, res) => {
   }
 });
 
-// Rota para configurações (ex: URLs de webhook) - Protegida por Admin
+// Rota para configurações - Protegida por Admin
 const configFile = path.join(dataDir, "config.json");
 if (!fs.existsSync(configFile)) {
   fs.writeFileSync(
@@ -369,41 +379,14 @@ app.post("/api/config", requireAdmin, (req, res) => {
     };
     fs.writeFileSync(configFile, JSON.stringify(newConfig, null, 2));
     console.log(`Configurações salvas por ${req.session.user.username}`);
+    // Recarrega as configs no módulo n8n após salvar
+    if (n8nIntegration.reloadN8nConfig) {
+        n8nIntegration.reloadN8nConfig();
+    }
     res.json({ success: true, message: "Configurações salvas com sucesso" });
   } catch (error) {
     console.error("Erro ao salvar configuração:", error);
     res.status(500).json({ error: "Erro ao salvar configuração" });
-  }
-});
-
-// Rota para enviar notificação (POST) - Exemplo, ajustar conforme necessidade
-// Esta rota pode precisar de autenticação dependendo de quem a chama
-app.post("/api/pedidos/notificar", (req, res) => {
-  try {
-    const { orderId, telefone, nomeCliente, oldStatus, newStatus } = req.body;
-    // Lógica para determinar a mensagem baseada no status
-    let mensagem = `Olá ${nomeCliente}! O status do seu pedido #${orderId.substring(
-      0,
-      8
-    )} foi atualizado para ${newStatus}.`;
-    // ... (adicionar casos específicos como no código original se necessário)
-
-    console.log(`Simulando envio de notificação para ${telefone}: "${mensagem}"`);
-    const logMessage = `[${new Date().toISOString()}] Notificação para ${telefone}: "${mensagem}"\n`;
-    fs.appendFileSync(path.join(dataDir, "notificacoes.log"), logMessage);
-
-    // Aqui você chamaria a API de notificação real (ex: WhatsApp, SMS)
-    // Ex: await enviarNotificacaoReal(telefone, mensagem);
-
-    res.json({
-      success: true,
-      message: "Notificação (simulada) enviada com sucesso",
-      telefone: telefone,
-      mensagem: mensagem,
-    });
-  } catch (error) {
-    console.error("Erro ao processar notificação:", error);
-    res.status(500).json({ error: "Erro ao processar notificação" });
   }
 });
 
@@ -412,19 +395,14 @@ app.get("/ping", (req, res) => {
   res.status(200).send("pong");
 });
 
-// Servir arquivos estáticos da pasta 'public' (se existir)
-// app.use(express.static(path.join(__dirname, "public")));
-
 // Rota principal para servir o index.html
 app.get("*/", (req, res) => {
-  // A verificação de sessão é feita no frontend ao carregar a página
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Iniciar o servidor
 app.listen(PORT, () => {
   console.log(`Servidor Mr. Shake rodando na porta ${PORT}`);
-  // Aviso sobre cookie não seguro (para lembrar de mudar em produção)
   console.warn(
     "AVISO: Cookie de sessão configurado como secure: false para teste. Mude para secure: true em produção com HTTPS."
   );
