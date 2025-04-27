@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mr. Shake - Gerenciamento de Pedidos</title>
     <style>
-        /* Estilos para a página de gerenciamento de pedidos Mr. Shake */
+        /* Estilos gerais e da aplicação principal (mantidos do original) */
         :root {
             --primary-color: #8A2BE2; /* Roxo */
             --secondary-color: #FF0000; /* Vermelho */
@@ -17,128 +17,144 @@
             --danger-color: #dc3545;
             --info-color: #17a2b8;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+        body { background-color: #f5f5f5; color: var(--dark-color); line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background-color: var(--primary-color); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header-left { display: flex; align-items: center; }
+        .logo { height: 60px; margin-right: 15px; border-radius: 50%; }
+        .brand-name { font-size: 1.5rem; font-weight: bold; }
+        .user-info { display: flex; align-items: center; }
+        .user-details { margin-right: 15px; text-align: right; }
+        .user-name { font-weight: bold; display: block; }
+        .user-role { font-size: 0.9em; color: #eee; display: block; }
+        .logout-btn { background-color: var(--secondary-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; }
+        .logout-btn:hover { background-color: #c82333; }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--primary-color); }
+        .tab { padding: 10px 20px; cursor: pointer; background-color: #e9ecef; border: none; border-radius: 5px 5px 0 0; margin-right: 5px; font-weight: bold; transition: background-color 0.3s; }
+        .tab.active { background-color: var(--primary-color); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .search-container { margin-bottom: 20px; display: flex; }
+        .search-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px 0 0 4px; font-size: 1rem; }
+        .search-btn { background-color: var(--primary-color); color: white; border: none; padding: 10px 15px; border-radius: 0 4px 4px 0; cursor: pointer; font-weight: bold; }
+        .orders-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .orders-table th, .orders-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        .orders-table th { background-color: var(--primary-color); color: white; font-weight: bold; }
+        .orders-table tr:hover { background-color: #f5f5f5; }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-align: center; display: inline-block; min-width: 120px; }
+        .status-received { background-color: var(--info-color); color: white; }
+        .status-preparing { background-color: var(--warning-color); color: black; }
+        .status-ready { background-color: var(--accent-color); color: black; }
+        .status-delivering { background-color: var(--primary-color); color: white; }
+        .status-delivered { background-color: var(--success-color); color: white; }
+        .status-canceled { background-color: var(--danger-color); color: white; }
+        .action-btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; transition: background-color 0.3s; }
+        .details-btn { background-color: var(--info-color); color: white; }
+        .details-btn:hover { background-color: #138496; }
+        .delete-btn { background-color: var(--danger-color); color: white; }
+        .delete-btn:hover { background-color: #bd2130; }
+        .refresh-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .refresh-btn { background-color: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; }
+        .refresh-btn:hover { background-color: #7526c1; }
+        .refresh-icon { margin-right: 5px; }
+        .auto-refresh { display: flex; align-items: center; }
+        .auto-refresh label { margin-right: 10px; }
+        .auto-refresh select { padding: 6px; border-radius: 4px; border: 1px solid #ddd; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: white; margin: 10% auto; padding: 20px; border-radius: 8px; width: 80%; max-width: 600px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); position: relative; }
+        .close { position: absolute; right: 20px; top: 15px; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa; }
+        .close:hover { color: black; }
+        .order-details { margin-top: 20px; }
+        .order-details h3 { color: var(--primary-color); margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .detail-row { display: flex; margin-bottom: 10px; }
+        .detail-label { font-weight: bold; width: 150px; color: var(--dark-color); }
+        .detail-value { flex: 1; }
+        .products-list { list-style-type: none; padding-left: 0; }
+        .products-list li { padding: 5px 0; border-bottom: 1px dashed #ddd; }
+        .status-actions { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .status-btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; flex: 1; min-width: 120px; margin-bottom: 10px; }
+        .btn-received { background-color: var(--info-color); color: white; }
+        .btn-preparing { background-color: var(--warning-color); color: black; }
+        .btn-ready { background-color: var(--accent-color); color: black; }
+        .btn-delivering { background-color: var(--primary-color); color: white; }
+        .btn-delivered { background-color: var(--success-color); color: white; }
+        .btn-canceled { background-color: var(--danger-color); color: white; }
+        .notification-container { position: fixed; top: 20px; right: 20px; z-index: 1001; }
+        .notification { background-color: var(--primary-color); color: white; padding: 15px 20px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; align-items: center; animation: slideIn 0.3s ease-out; }
+        .notification.error { background-color: var(--danger-color); }
+        .notification.success { background-color: var(--success-color); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .notification-log-container { margin-top: 30px; background-color: white; border-radius: 5px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .notification-log-title { color: var(--primary-color); margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .notification-log { max-height: 200px; overflow-y: auto; }
+        .log-entry { padding: 8px 0; border-bottom: 1px dashed #ddd; display: flex; }
+        .log-time { font-weight: bold; color: var(--primary-color); margin-right: 10px; min-width: 80px; }
+        .log-message { flex: 1; }
+        .config-button { background-color: var(--accent-color); color: black; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        .config-button:hover { background-color: #e6c200; }
+        #integrationConfigForm .form-group { margin-bottom: 20px; }
+        #integrationConfigForm label { display: block; margin-bottom: 5px; font-weight: bold; }
+        #integrationConfigForm input[type="text"], #integrationConfigForm input[type="password"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; }
+        #integrationConfigForm button { background-color: var(--primary-color); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; }
+        #integrationConfigForm button:hover { background-color: #7526c1; }
+        .hidden { display: none !important; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-        }
-
-        body {
+        /* Estilos da tela de login (reutilizando e adicionando) */
+        .login-page {
+            display: flex; /* Inicialmente visível */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             background-color: #f5f5f5;
-            color: var(--dark-color);
-            line-height: 1.6;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Estilos do cabeçalho */
-        .header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo {
-            height: 60px;
-            margin-right: 15px;
-            border-radius: 50%;
-        }
-
-        .brand-name {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .user-name {
-            margin-right: 15px;
-            font-weight: bold;
-        }
-
-        .logout-btn {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-
-        .logout-btn:hover {
-            background-color: #c82333;
-        }
-
-        /* Estilos da tela de login */
         .login-container {
             max-width: 400px;
-            margin: 100px auto;
-            padding: 30px;
+            width: 90%;
+            padding: 40px;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             text-align: center;
         }
-
         .login-logo {
             width: 120px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             border-radius: 50%;
         }
-
         .login-title {
             color: var(--primary-color);
-            margin-bottom: 20px;
-            font-size: 1.8rem;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            font-weight: bold;
         }
-
         .login-form {
             display: flex;
             flex-direction: column;
         }
-
-        .form-group {
-            margin-bottom: 15px;
+        .login-form .form-group {
+            margin-bottom: 20px;
             text-align: left;
         }
-
-        .form-group label {
+        .login-form label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
             color: var(--dark-color);
+            font-size: 0.95rem;
         }
-
-        .form-group input {
+        .login-form input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 1rem;
         }
-
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+        }
         .btn-primary {
             background-color: var(--primary-color);
             color: white;
@@ -146,1205 +162,584 @@
             padding: 12px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: bold;
             transition: background-color 0.3s;
             margin-top: 10px;
+            width: 100%;
         }
-
         .btn-primary:hover {
             background-color: #7526c1;
         }
-
         .error-message {
             color: var(--danger-color);
             margin-top: 15px;
             font-size: 0.9rem;
-        }
-
-        /* Estilos das abas */
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--primary-color);
-        }
-
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            background-color: #e9ecef;
-            border: none;
-            border-radius: 5px 5px 0 0;
-            margin-right: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-
-        .tab.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Estilos da tabela de pedidos */
-        .search-container {
-            margin-bottom: 20px;
-            display: flex;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px 0 0 4px;
-            font-size: 1rem;
-        }
-
-        .search-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 0 4px 4px 0;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .orders-table th, .orders-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .orders-table th {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: bold;
-        }
-
-        .orders-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-align: center;
-            display: inline-block;
-            min-width: 120px;
-        }
-
-        .status-received {
-            background-color: var(--info-color);
-            color: white;
-        }
-
-        .status-preparing {
-            background-color: var(--warning-color);
-            color: black;
-        }
-
-        .status-ready {
-            background-color: var(--accent-color);
-            color: black;
-        }
-
-        .status-delivering {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .status-delivered {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .status-canceled {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .action-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-right: 5px;
-            transition: background-color 0.3s;
-        }
-
-        .details-btn {
-            background-color: var(--info-color);
-            color: white;
-        }
-
-        .details-btn:hover {
-            background-color: #138496;
-        }
-
-        .delete-btn {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .delete-btn:hover {
-            background-color: #bd2130;
-        }
-
-        .refresh-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .refresh-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
-
-        .refresh-btn:hover {
-            background-color: #7526c1;
-        }
-
-        .refresh-icon {
-            margin-right: 5px;
-        }
-
-        .auto-refresh {
-            display: flex;
-            align-items: center;
-        }
-
-        .auto-refresh label {
-            margin-right: 10px;
-        }
-
-        .auto-refresh select {
-            padding: 6px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-
-        /* Estilos do modal de detalhes do pedido */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 80%;
-            max-width: 600px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            position: relative;
-        }
-
-        .close {
-            position: absolute;
-            right: 20px;
-            top: 15px;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #aaa;
-        }
-
-        .close:hover {
-            color: black;
-        }
-
-        .order-details {
-            margin-top: 20px;
-        }
-
-        .order-details h3 {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-        }
-
-        .detail-row {
-            display: flex;
-            margin-bottom: 10px;
-        }
-
-        .detail-label {
-            font-weight: bold;
-            width: 150px;
-            color: var(--dark-color);
-        }
-
-        .detail-value {
-            flex: 1;
-        }
-
-        .products-list {
-            list-style-type: none;
-            padding-left: 0;
-        }
-
-        .products-list li {
-            padding: 5px 0;
-            border-bottom: 1px dashed #ddd;
-        }
-
-        .status-actions {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .status-btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            flex: 1;
-            min-width: 120px;
-            margin-bottom: 10px;
-        }
-
-        .btn-received {
-            background-color: var(--info-color);
-            color: white;
-        }
-
-        .btn-preparing {
-            background-color: var(--warning-color);
-            color: black;
-        }
-
-        .btn-ready {
-            background-color: var(--accent-color);
-            color: black;
-        }
-
-        .btn-delivering {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-delivered {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .btn-canceled {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        /* Estilos para notificações */
-        .notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1001;
-        }
-
-        .notification {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        .notification.error {
-            background-color: var(--danger-color);
-        }
-
-        .notification.success {
-            background-color: var(--success-color);
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Estilos para o log de notificações */
-        .notification-log-container {
-            margin-top: 30px;
-            background-color: white;
-            border-radius: 5px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .notification-log-title {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-        }
-
-        .notification-log {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .log-entry {
-            padding: 8px 0;
-            border-bottom: 1px dashed #ddd;
-            display: flex;
-        }
-
-        .log-time {
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-right: 10px;
-            min-width: 80px;
-        }
-
-        .log-message {
-            flex: 1;
-        }
-
-        /* Estilos para o botão de adicionar pedido de teste */
-        .add-test-order {
-            background-color: var(--accent-color);
-            color: black;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .add-test-order:hover {
-            background-color: #e6c200;
-        }
-
-        /* Estilos para o botão de configuração */
-        .config-button {
-            background-color: var(--accent-color);
-            color: black;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .config-button:hover {
-            background-color: #e6c200;
+            min-height: 1.2em; /* Para evitar que o layout pule */
         }
 
         /* Responsividade */
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .header-left {
-                margin-bottom: 10px;
-                flex-direction: column;
-            }
-
-            .logo {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-
-            .user-info {
-                flex-direction: column;
-            }
-
-            .user-name {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-
-            .orders-table {
-                display: block;
-                overflow-x: auto;
-            }
-
-            .modal-content {
-                width: 95%;
-                margin: 5% auto;
-            }
-
-            .status-actions {
-                flex-direction: column;
-            }
-
-            .status-btn {
-                width: 100%;
-            }
-
-            .refresh-container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .auto-refresh {
-                margin-top: 10px;
-            }
-        }
-
-        /* Estilos para o botão de simulação de pedido */
-        .simulate-order-btn {
-            background-color: var(--accent-color);
-            color: black;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .simulate-order-btn:hover {
-            background-color: #e6c200;
-        }
-
-        /* Estilos para o formulário de configuração */
-        #integrationConfigForm .form-group {
-            margin-bottom: 20px;
-        }
-
-        #integrationConfigForm label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            .header { flex-direction: column; text-align: center; }
+            .header-left { margin-bottom: 10px; flex-direction: column; }
+            .logo { margin-right: 0; margin-bottom: 10px; }
+            .user-info { flex-direction: column; }
+            .user-details { margin-right: 0; margin-bottom: 10px; text-align: center; }
+            .orders-table { display: block; overflow-x: auto; }
+            .modal-content { width: 95%; margin: 5% auto; }
+            .status-actions { flex-direction: column; }
+            .status-btn { width: 100%; }
+            .refresh-container { flex-direction: column; align-items: flex-start; }
+            .auto-refresh { margin-top: 10px; }
+            .login-container { margin: 50px auto; }
         }
     </style>
 </head>
 <body>
-    <div class="notification-container" id="notificationContainer"></div>
 
-    <div class="container">
-        <div class="header">
-            <div class="header-left">
-                <img src="https://via.placeholder.com/60/8A2BE2/FFFFFF?text=MS" alt="Logo" class="logo">
-                <div class="brand-name">Mr. Shake - Gerenciamento de Pedidos</div>
-            </div>
-            <div class="user-info">
-                <div class="user-name">Administrador</div>
-                <button class="config-button" id="configButton">Configurações</button>
-                <button class="logout-btn">Sair</button>
-            </div>
-        </div>
-
-        <div class="tabs">
-            <button class="tab active" data-tab="orders">Pedidos</button>
-            <button class="tab" data-tab="notifications">Notificações</button>
-        </div>
-
-        <div class="tab-content active" id="ordersTab">
-            <div class="refresh-container">
-                <div>
-                    <button class="refresh-btn" id="refreshButton">
-                        <span class="refresh-icon">↻</span> Atualizar
-                    </button>
-                    <button class="add-test-order" id="addTestOrderButton">Adicionar Pedido de Teste</button>
-                    <button class="simulate-order-btn" id="simulateOrderButton">Simular Pedido WhatsApp</button>
-                </div>
-                <div class="auto-refresh">
-                    <label for="refreshInterval">Atualização automática:</label>
-                    <select id="refreshInterval">
-                        <option value="0">Desativada</option>
-                        <option value="5000">5 segundos</option>
-                        <option value="10000">10 segundos</option>
-                        <option value="30000" selected>30 segundos</option>
-                        <option value="60000">1 minuto</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="search-container">
-                <input type="text" class="search-input" id="searchInput" placeholder="Buscar por nome, telefone ou status...">
-                <button class="search-btn">Buscar</button>
-            </div>
-
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Telefone</th>
-                        <th>Produtos</th>
-                        <th>Valor</th>
-                        <th>Status</th>
-                        <th>Data/Hora</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="ordersTableBody">
-                    <!-- Os pedidos serão carregados dinamicamente aqui -->
-                </tbody>
-            </table>
-        </div>
-
-        <div class="tab-content" id="notificationsTab">
-            <div class="notification-log-container">
-                <h3 class="notification-log-title">Histórico de Notificações</h3>
-                <div class="notification-log" id="notificationLog">
-                    <!-- As notificações serão carregadas dinamicamente aqui -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Detalhes do Pedido -->
-    <div class="modal" id="orderDetailsModal">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <h2>Detalhes do Pedido</h2>
-            <div class="order-details" id="orderDetails">
-                <!-- Os detalhes do pedido serão carregados dinamicamente aqui -->
-            </div>
-            <div class="status-actions" id="statusActions">
-                <!-- Os botões de status serão carregados dinamicamente aqui -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Configuração -->
-    <div class="modal" id="configModal">
-        <div class="modal-content">
-            <span class="close" id="closeConfigModal">&times;</span>
-            <h2>Configurações de Integração</h2>
-            <form id="integrationConfigForm">
+    <!-- Tela de Login -->
+    <div id="login-page" class="login-page">
+        <div class="login-container">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5N0RLkXJ7kLG3KqIpUoQ-rVvQ5L5X5X5X5Q&s" alt="Mr. Shake Logo" class="login-logo">
+            <h2 class="login-title">Login - Mr. Shake</h2>
+            <form id="login-form" class="login-form">
                 <div class="form-group">
-                    <label for="webhookUrl">URL do Webhook (n8n):</label>
-                    <input type="text" id="webhookUrl" placeholder="https://seu-n8n.com/webhook/abc123">
+                    <label for="username">Usuário:</label>
+                    <input type="text" id="username" name="username" required>
                 </div>
                 <div class="form-group">
-                    <label for="statusWebhookUrl">URL do Webhook para Status (n8n):</label>
-                    <input type="text" id="statusWebhookUrl" placeholder="https://seu-n8n.com/webhook/def456">
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" name="password" required>
                 </div>
-                <div class="form-group">
-                    <label for="apiKey">Chave de API (opcional):</label>
-                    <input type="text" id="apiKey" placeholder="Chave secreta para autenticação">
-                </div>
-                <button type="submit" class="btn-primary">Salvar Configurações</button>
+                <button type="submit" class="btn-primary">Entrar</button>
+                <p id="login-error" class="error-message"></p>
             </form>
         </div>
     </div>
 
+    <!-- Conteúdo Principal da Aplicação (Inicialmente Oculto) -->
+    <div id="app-content" class="hidden">
+        <div class="header">
+            <div class="header-left">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5N0RLkXJ7kLG3KqIpUoQ-rVvQ5L5X5X5X5Q&s" alt="Mr. Shake Logo" class="logo">
+                <span class="brand-name">Mr. Shake - Gerenciamento</span>
+            </div>
+            <div class="user-info">
+                <div class="user-details">
+                    <span id="user-name" class="user-name"></span>
+                    <span id="user-role" class="user-role"></span>
+                </div>
+                <button id="logout-btn" class="logout-btn">Sair</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="tabs">
+                <button class="tab active" data-tab="pedidos">Pedidos</button>
+                <button class="tab admin-only hidden" data-tab="configuracoes">Configurações</button> <!-- Aba só para admin -->
+            </div>
+
+            <!-- Conteúdo da Aba Pedidos -->
+            <div id="pedidos" class="tab-content active">
+                <div class="refresh-container">
+                    <button id="refresh-btn" class="refresh-btn">
+                        <span class="refresh-icon">&#x21bb;</span> Atualizar Pedidos
+                    </button>
+                    <div class="auto-refresh">
+                        <label for="auto-refresh-interval">Atualização Automática:</label>
+                        <select id="auto-refresh-interval">
+                            <option value="0">Desativada</option>
+                            <option value="30">30 segundos</option>
+                            <option value="60">1 minuto</option>
+                            <option value="300">5 minutos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="Buscar por nome, telefone ou ID...">
+                    <button id="search-btn" class="search-btn">Buscar</button>
+                </div>
+
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Telefone</th>
+                            <th>Status</th>
+                            <th>Horário</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-tbody">
+                        <!-- Linhas de pedidos serão inseridas aqui -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Conteúdo da Aba Configurações (Só Admin) -->
+            <div id="configuracoes" class="tab-content admin-only hidden">
+                <h2>Configurações de Integração</h2>
+                <form id="integrationConfigForm">
+                    <div class="form-group">
+                        <label for="webhookUrlNovoPedido">URL Webhook (Novo Pedido):</label>
+                        <input type="text" id="webhookUrlNovoPedido" name="webhookUrlNovoPedido" placeholder="https://seu-webhook.com/novo-pedido">
+                    </div>
+                    <div class="form-group">
+                        <label for="webhookUrlAtualizacaoStatus">URL Webhook (Atualização Status):</label>
+                        <input type="text" id="webhookUrlAtualizacaoStatus" name="webhookUrlAtualizacaoStatus" placeholder="https://seu-webhook.com/status-update">
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKey">Chave de API (se aplicável):</label>
+                        <input type="password" id="apiKey" name="apiKey" placeholder="Sua chave secreta">
+                    </div>
+                    <button type="submit">Salvar Configurações</button>
+                </form>
+                <p id="config-message" style="margin-top: 15px;"></p>
+            </div>
+        </div>
+
+        <!-- Modal de Detalhes do Pedido -->
+        <div id="orderModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div class="order-details">
+                    <h3>Detalhes do Pedido <span id="modalOrderId"></span></h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Cliente:</span>
+                        <span id="modalClientName" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Telefone:</span>
+                        <span id="modalClientPhone" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Endereço:</span>
+                        <span id="modalClientAddress" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Produtos:</span>
+                        <ul id="modalProducts" class="detail-value products-list"></ul>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Valor Total:</span>
+                        <span id="modalTotalValue" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Forma Pagamento:</span>
+                        <span id="modalPaymentMethod" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status Atual:</span>
+                        <span id="modalCurrentStatus" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Horário Pedido:</span>
+                        <span id="modalTimestamp" class="detail-value"></span>
+                    </div>
+
+                    <h4>Alterar Status:</h4>
+                    <div class="status-actions">
+                        <button class="status-btn btn-received" onclick="updateOrderStatus(this.dataset.orderId, 'Pedido Recebido')">Recebido</button>
+                        <button class="status-btn btn-preparing" onclick="updateOrderStatus(this.dataset.orderId, 'Em Preparo')">Em Preparo</button>
+                        <button class="status-btn btn-ready" onclick="updateOrderStatus(this.dataset.orderId, 'Pronto para Entrega')">Pronto</button>
+                        <button class="status-btn btn-delivering" onclick="updateOrderStatus(this.dataset.orderId, 'Saiu para Entrega')">Saiu Entrega</button>
+                        <button class="status-btn btn-delivered" onclick="updateOrderStatus(this.dataset.orderId, 'Entregue')">Entregue</button>
+                        <button class="status-btn btn-canceled" onclick="updateOrderStatus(this.dataset.orderId, 'Cancelado')">Cancelado</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container para Notificações -->
+        <div id="notification-container" class="notification-container"></div>
+
+        <!-- Log de Notificações (Opcional, pode ser removido se não for usado) -->
+        <!-- <div class="container notification-log-container">
+            <h3 class="notification-log-title">Log de Notificações</h3>
+            <div id="notification-log" class="notification-log"></div>
+        </div> -->
+    </div>
+
     <script>
-        // Variáveis globais
-        let orders = [];
-        let notificationLog = [];
-        let refreshIntervalId = null;
-        let config = {
-            webhookUrl: localStorage.getItem('webhookUrl') || '',
-            statusWebhookUrl: localStorage.getItem('statusWebhookUrl') || '',
-            apiKey: localStorage.getItem('apiKey') || ''
-        };
+        const loginPage = document.getElementById('login-page');
+        const appContent = document.getElementById('app-content');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userNameDisplay = document.getElementById('user-name');
+        const userRoleDisplay = document.getElementById('user-role');
+        const ordersTbody = document.getElementById('orders-tbody');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const autoRefreshIntervalSelect = document.getElementById('auto-refresh-interval');
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const modal = document.getElementById('orderModal');
+        const notificationContainer = document.getElementById('notification-container');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const configTab = document.querySelector('.tab[data-tab="configuracoes"]');
+        const configForm = document.getElementById('integrationConfigForm');
+        const configMessage = document.getElementById('config-message');
 
-        // Elementos DOM
-        const ordersTableBody = document.getElementById('ordersTableBody');
-        const notificationContainer = document.getElementById('notificationContainer');
-        const notificationLogElement = document.getElementById('notificationLog');
-        const orderDetailsModal = document.getElementById('orderDetailsModal');
-        const orderDetailsContent = document.getElementById('orderDetails');
-        const statusActionsContent = document.getElementById('statusActions');
-        const closeModalBtn = document.getElementById('closeModal');
-        const refreshButton = document.getElementById('refreshButton');
-        const addTestOrderButton = document.getElementById('addTestOrderButton');
-        const simulateOrderButton = document.getElementById('simulateOrderButton');
-        const refreshIntervalSelect = document.getElementById('refreshInterval');
-        const searchInput = document.getElementById('searchInput');
-        const configButton = document.getElementById('configButton');
-        const configModal = document.getElementById('configModal');
-        const closeConfigModalBtn = document.getElementById('closeConfigModal');
-        const integrationConfigForm = document.getElementById('integrationConfigForm');
-        const webhookUrlInput = document.getElementById('webhookUrl');
-        const statusWebhookUrlInput = document.getElementById('statusWebhookUrl');
-        const apiKeyInput = document.getElementById('apiKey');
+        let autoRefreshIntervalId = null;
+        let currentUserRole = null;
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', () => {
-            loadOrders();
-            setupTabNavigation();
-            setupEventListeners();
-            loadConfig();
-            startAutoRefresh();
-        });
-
-        // Configurar navegação por abas
-        function setupTabNavigation() {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    
-                    // Remover classe active de todas as abas
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    // Adicionar classe active à aba clicada
-                    tab.classList.add('active');
-                    document.getElementById(`${tabId}Tab`).classList.add('active');
-                });
-            });
-        }
-
-        // Configurar event listeners
-        function setupEventListeners() {
-            refreshButton.addEventListener('click', loadOrders);
-            addTestOrderButton.addEventListener('click', addTestOrder);
-            simulateOrderButton.addEventListener('click', simulateWhatsAppOrder);
-            closeModalBtn.addEventListener('click', () => orderDetailsModal.style.display = 'none');
-            configButton.addEventListener('click', () => {
-                loadConfig();
-                configModal.style.display = 'block';
-            });
-            closeConfigModalBtn.addEventListener('click', () => configModal.style.display = 'none');
-            integrationConfigForm.addEventListener('submit', saveConfig);
-            refreshIntervalSelect.addEventListener('change', startAutoRefresh);
-            searchInput.addEventListener('input', filterOrders);
-            
-            // Fechar modal ao clicar fora dele
-            window.addEventListener('click', (event) => {
-                if (event.target === orderDetailsModal) {
-                    orderDetailsModal.style.display = 'none';
-                }
-                if (event.target === configModal) {
-                    configModal.style.display = 'none';
-                }
-            });
-        }
-
-        // Carregar configurações
-        function loadConfig() {
-            webhookUrlInput.value = config.webhookUrl;
-            statusWebhookUrlInput.value = config.statusWebhookUrl;
-            apiKeyInput.value = config.apiKey;
-        }
-
-        // Salvar configurações
-        function saveConfig(event) {
-            event.preventDefault();
-            
-            config.webhookUrl = webhookUrlInput.value;
-            config.statusWebhookUrl = statusWebhookUrlInput.value;
-            config.apiKey = apiKeyInput.value;
-            
-            localStorage.setItem('webhookUrl', config.webhookUrl);
-            localStorage.setItem('statusWebhookUrl', config.statusWebhookUrl);
-            localStorage.setItem('apiKey', config.apiKey);
-            
-            showNotification('Configurações salvas com sucesso!', 'success');
-            configModal.style.display = 'none';
-        }
-
-        // Iniciar atualização automática
-        function startAutoRefresh() {
-            const interval = parseInt(refreshIntervalSelect.value);
-            
-            // Limpar intervalo existente
-            if (refreshIntervalId) {
-                clearInterval(refreshIntervalId);
-                refreshIntervalId = null;
-            }
-            
-            // Configurar novo intervalo se não for zero
-            if (interval > 0) {
-                refreshIntervalId = setInterval(loadOrders, interval);
-            }
-        }
-
-        // Carregar pedidos da API
-        function loadOrders() {
-            fetch('/api/pedidos/get-orders')
-                .then(response => response.json())
-                .then(data => {
-                    orders = data;
-                    renderOrders(orders);
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar pedidos:', error);
-                    showNotification('Erro ao carregar pedidos. Tente novamente.', 'error');
-                });
-        }
-
-        // Renderizar pedidos na tabela
-        function renderOrders(ordersToRender) {
-            ordersTableBody.innerHTML = '';
-            
-            if (ordersToRender.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="8" style="text-align: center;">Nenhum pedido encontrado</td>`;
-                ordersTableBody.appendChild(row);
-                return;
-            }
-            
-            // Ordenar pedidos do mais recente para o mais antigo
-            ordersToRender.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            ordersToRender.forEach(order => {
-                const row = document.createElement('tr');
-                
-                const formattedDate = new Date(order.timestamp).toLocaleString('pt-BR');
-                const formattedValue = `R$ ${order.valorTotal.toFixed(2)}`;
-                const statusClass = getStatusClass(order.status);
-                
-                row.innerHTML = `
-                    <td>${order.id.substring(0, 8)}</td>
-                    <td>${order.nomeCliente}</td>
-                    <td>${order.telefone}</td>
-                    <td>${order.produtos.join(', ')}</td>
-                    <td>${formattedValue}</td>
-                    <td><span class="status-badge ${statusClass}">${order.status}</span></td>
-                    <td>${formattedDate}</td>
-                    <td>
-                        <button class="action-btn details-btn" data-id="${order.id}">Detalhes</button>
-                    </td>
-                `;
-                
-                ordersTableBody.appendChild(row);
-                
-                // Adicionar event listener para o botão de detalhes
-                const detailsBtn = row.querySelector('.details-btn');
-                detailsBtn.addEventListener('click', () => showOrderDetails(order));
-            });
-        }
-
-        // Filtrar pedidos
-        function filterOrders() {
-            const searchTerm = searchInput.value.toLowerCase();
-            
-            if (!searchTerm) {
-                renderOrders(orders);
-                return;
-            }
-            
-            const filteredOrders = orders.filter(order => 
-                order.nomeCliente.toLowerCase().includes(searchTerm) ||
-                order.telefone.toLowerCase().includes(searchTerm) ||
-                order.status.toLowerCase().includes(searchTerm) ||
-                order.produtos.some(p => p.toLowerCase().includes(searchTerm))
-            );
-            
-            renderOrders(filteredOrders);
-        }
-
-        // Obter classe CSS para status
-        function getStatusClass(status) {
-            switch (status) {
-                case 'Pedido Recebido': return 'status-received';
-                case 'Em Preparo': return 'status-preparing';
-                case 'Pronto para Entrega': return 'status-ready';
-                case 'Saiu para Entrega': return 'status-delivering';
-                case 'Entregue': return 'status-delivered';
-                case 'Cancelado': return 'status-canceled';
-                default: return '';
-            }
-        }
-
-        // Mostrar detalhes do pedido
-        function showOrderDetails(order) {
-            orderDetailsContent.innerHTML = `
-                <h3>Pedido #${order.id.substring(0, 8)}</h3>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Cliente:</div>
-                    <div class="detail-value">${order.nomeCliente}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Telefone:</div>
-                    <div class="detail-value">${order.telefone}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Endereço:</div>
-                    <div class="detail-value">${order.endereco || 'Não informado'}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Produtos:</div>
-                    <div class="detail-value">
-                        <ul class="products-list">
-                            ${order.produtos.map(p => `<li>${p}</li>`).join('')}
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Valor Total:</div>
-                    <div class="detail-value">R$ ${order.valorTotal.toFixed(2)}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Forma de Pagamento:</div>
-                    <div class="detail-value">${order.formaPagamento || 'Não informado'}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Status Atual:</div>
-                    <div class="detail-value">
-                        <span class="status-badge ${getStatusClass(order.status)}">${order.status}</span>
-                    </div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Data/Hora:</div>
-                    <div class="detail-value">${new Date(order.timestamp).toLocaleString('pt-BR')}</div>
-                </div>
-            `;
-            
-            // Configurar botões de status
-            statusActionsContent.innerHTML = `
-                <button class="status-btn btn-received" data-status="Pedido Recebido" data-id="${order.id}">Pedido Recebido</button>
-                <button class="status-btn btn-preparing" data-status="Em Preparo" data-id="${order.id}">Em Preparo</button>
-                <button class="status-btn btn-ready" data-status="Pronto para Entrega" data-id="${order.id}">Pronto para Entrega</button>
-                <button class="status-btn btn-delivering" data-status="Saiu para Entrega" data-id="${order.id}">Saiu para Entrega</button>
-                <button class="status-btn btn-delivered" data-status="Entregue" data-id="${order.id}">Entregue</button>
-                <button class="status-btn btn-canceled" data-status="Cancelado" data-id="${order.id}">Cancelado</button>
-            `;
-            
-            // Adicionar event listeners para os botões de status
-            const statusButtons = statusActionsContent.querySelectorAll('.status-btn');
-            statusButtons.forEach(button => {
-                button.addEventListener('click', () => updateOrderStatus(button.getAttribute('data-id'), button.getAttribute('data-status'), order.telefone, order.nomeCliente, order.status));
-            });
-            
-            // Mostrar modal
-            orderDetailsModal.style.display = 'block';
-        }
-
-        // Atualizar status do pedido
-        function updateOrderStatus(orderId, newStatus, telefone, nomeCliente, oldStatus) {
-            fetch('/api/pedidos/update-status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    orderId,
-                    newStatus,
-                    telefone,
-                    nomeCliente,
-                    oldStatus
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification(`Status atualizado para: ${newStatus}`, 'success');
-                    
-                    // Atualizar pedido na lista local
-                    const orderIndex = orders.findIndex(o => o.id === orderId);
-                    if (orderIndex !== -1) {
-                        orders[orderIndex].status = newStatus;
-                        renderOrders(orders);
-                    }
-                    
-                    // Enviar notificação
-                    sendNotification(orderId, telefone, nomeCliente, oldStatus, newStatus);
-                    
-                    // Fechar modal
-                    orderDetailsModal.style.display = 'none';
-                } else {
-                    showNotification('Erro ao atualizar status', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao atualizar status:', error);
-                showNotification('Erro ao atualizar status. Tente novamente.', 'error');
-            });
-        }
-
-        // Enviar notificação
-        function sendNotification(orderId, telefone, nomeCliente, oldStatus, newStatus) {
-            fetch('/api/pedidos/notificar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    orderId,
-                    telefone,
-                    nomeCliente,
-                    oldStatus,
-                    newStatus
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Adicionar ao log de notificações
-                    addToNotificationLog(`Notificação enviada para ${telefone}: "${data.mensagem}"`);
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao enviar notificação:', error);
-            });
-            
-            // Enviar para webhook do n8n se configurado
-            if (config.statusWebhookUrl) {
-                fetch(config.statusWebhookUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': config.apiKey || ''
-                    },
-                    body: JSON.stringify({
-                        evento: 'atualizacao_status',
-                        pedido: {
-                            id: orderId,
-                            telefone: telefone,
-                            nomeCliente: nomeCliente,
-                            statusAntigo: oldStatus,
-                            statusNovo: newStatus,
-                            timestamp: new Date().toISOString()
-                        }
-                    })
-                })
-                .then(response => {
-                    if (response.ok) {
-                        addToNotificationLog(`Notificação enviada para n8n: Atualização de status para ${newStatus}`);
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao enviar para webhook:', error);
-                });
-            }
-        }
-
-        // Adicionar pedido de teste
-        function addTestOrder() {
-            const testOrder = {
-                Cliente: "Cliente de Teste",
-                Telefone: "11999999999",
-                Endereço: "Rua de Teste, 123",
-                Produtos: "Milk Shake de Chocolate G com leite condensado",
-                "Forma de Pagamento": "Dinheiro"
-            };
-            
-            fetch('/api/pedidos/get-orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(testOrder)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Pedido de teste adicionado com sucesso!', 'success');
-                    loadOrders();
-                    
-                    // Enviar para webhook do n8n se configurado
-                    if (config.webhookUrl) {
-                        fetch(config.webhookUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-API-Key': config.apiKey || ''
-                            },
-                            body: JSON.stringify({
-                                evento: 'novo_pedido',
-                                pedido: data.pedido
-                            })
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                addToNotificationLog(`Notificação enviada para n8n: Novo pedido de teste`);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erro ao enviar para webhook:', error);
-                        });
-                    }
-                } else {
-                    showNotification('Erro ao adicionar pedido de teste', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao adicionar pedido de teste:', error);
-                showNotification('Erro ao adicionar pedido de teste. Tente novamente.', 'error');
-            });
-        }
-
-        // Simular pedido via WhatsApp
-        function simulateWhatsAppOrder() {
-            const flavors = ['Chocolate', 'Morango', 'Baunilha', 'Caramelo', 'Cookies'];
-            const sizes = ['P', 'M', 'G'];
-            const extras = ['com leite condensado', 'com calda extra', 'com granulado', 'com banana', 'com morango'];
-            
-            const randomFlavor = flavors[Math.floor(Math.random() * flavors.length)];
-            const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
-            const randomExtra = extras[Math.floor(Math.random() * extras.length)];
-            
-            const names = ['João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Lúcia', 'Fernando', 'Juliana'];
-            const randomName = names[Math.floor(Math.random() * names.length)];
-            
-            // Gerar número de telefone aleatório
-            const randomPhone = `11${Math.floor(Math.random() * 90000000) + 10000000}`;
-            
-            // Gerar endereço aleatório
-            const streets = ['Rua das Flores', 'Av. Paulista', 'Rua Augusta', 'Av. Brasil', 'Rua dos Pinheiros'];
-            const randomStreet = streets[Math.floor(Math.random() * streets.length)];
-            const randomNumber = Math.floor(Math.random() * 1000) + 1;
-            
-            const whatsappOrder = {
-                Cliente: `${randomName} (WhatsApp)`,
-                Telefone: randomPhone,
-                Endereço: `${randomStreet}, ${randomNumber}`,
-                Produtos: `Milk Shake de ${randomFlavor} ${randomSize} ${randomExtra}`,
-                "Forma de Pagamento": Math.random() > 0.5 ? "Dinheiro" : "Cartão de Crédito"
-            };
-            
-            fetch('/api/pedidos/get-orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(whatsappOrder)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Simulação de pedido via WhatsApp recebida!', 'success');
-                    loadOrders();
-                    
-                    // Enviar para webhook do n8n se configurado
-                    if (config.webhookUrl) {
-                        fetch(config.webhookUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-API-Key': config.apiKey || ''
-                            },
-                            body: JSON.stringify({
-                                evento: 'novo_pedido',
-                                pedido: data.pedido,
-                                origem: 'whatsapp'
-                            })
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                addToNotificationLog(`Notificação enviada para n8n: Novo pedido via WhatsApp`);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erro ao enviar para webhook:', error);
-                        });
-                    }
-                } else {
-                    showNotification('Erro ao simular pedido via WhatsApp', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao simular pedido via WhatsApp:', error);
-                showNotification('Erro ao simular pedido via WhatsApp. Tente novamente.', 'error');
-            });
-        }
-
-        // Mostrar notificação
-        function showNotification(message, type = '') {
+        // --- Funções de Notificação ---
+        function showNotification(message, type = 'info', duration = 5000) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
-            
             notificationContainer.appendChild(notification);
-            
-            // Remover notificação após 5 segundos
+
             setTimeout(() => {
                 notification.remove();
-            }, 5000);
-            
-            // Adicionar ao log de notificações
-            addToNotificationLog(message);
+            }, duration);
         }
 
-        // Adicionar ao log de notificações
-        function addToNotificationLog(message) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('pt-BR');
-            
-            notificationLog.unshift({
-                time: timeString,
-                message: message
-            });
-            
-            // Limitar a 50 entradas
-            if (notificationLog.length > 50) {
-                notificationLog.pop();
+        // --- Funções de Login/Logout/Sessão ---
+        async function checkSession() {
+            try {
+                const response = await fetch('/session');
+                const data = await response.json();
+
+                if (data.loggedIn && data.user) {
+                    currentUserRole = data.user.role;
+                    showApp(data.user);
+                } else {
+                    showLogin();
+                }
+            } catch (error) {
+                console.error('Erro ao verificar sessão:', error);
+                showLogin(); // Mostra login em caso de erro
+                loginError.textContent = 'Erro ao conectar com o servidor. Tente novamente mais tarde.';
             }
-            
-            // Atualizar a exibição do log
-            renderNotificationLog();
         }
 
-        // Renderizar log de notificações
-        function renderNotificationLog() {
-            notificationLogElement.innerHTML = '';
-            
-            notificationLog.forEach(entry => {
-                const logEntry = document.createElement('div');
-                logEntry.className = 'log-entry';
-                
-                logEntry.innerHTML = `
-                    <div class="log-time">${entry.time}</div>
-                    <div class="log-message">${entry.message}</div>
+        function showLogin() {
+            loginPage.style.display = 'flex';
+            appContent.classList.add('hidden');
+            currentUserRole = null;
+            stopAutoRefresh(); // Para auto-refresh se estiver ativo
+        }
+
+        function showApp(user) {
+            loginPage.style.display = 'none';
+            appContent.classList.remove('hidden');
+            userNameDisplay.textContent = user.username;
+            userRoleDisplay.textContent = user.role === 'admin' ? 'Administrador' : 'Funcionário';
+
+            // Controle de acesso visual
+            document.querySelectorAll('.admin-only').forEach(el => {
+                if (user.role === 'admin') {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
+            fetchOrders(); // Carrega pedidos ao mostrar o app
+            startAutoRefresh(); // Inicia auto-refresh baseado na seleção
+            if (user.role === 'admin') {
+                loadConfig(); // Carrega configurações se for admin
+            }
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.textContent = ''; // Limpa erro anterior
+            const username = e.target.username.value;
+            const password = e.target.password.value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    currentUserRole = data.user.role;
+                    showApp(data.user);
+                } else {
+                    loginError.textContent = data.message || 'Erro no login.';
+                }
+            } catch (error) {
+                console.error('Erro ao fazer login:', error);
+                loginError.textContent = 'Erro ao conectar com o servidor.';
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/logout');
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    showLogin();
+                } else {
+                    showNotification(data.message || 'Erro ao fazer logout.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error);
+                showNotification('Erro ao conectar com o servidor.', 'error');
+            }
+        });
+
+        // --- Funções de Pedidos ---
+        async function fetchOrders(searchTerm = '') {
+            try {
+                const response = await fetch('/api/pedidos/get-orders');
+                if (!response.ok) {
+                    if (response.status === 401) { // Não autorizado, provavelmente sessão expirou
+                        showLogin();
+                        loginError.textContent = 'Sua sessão expirou. Faça login novamente.';
+                        return;
+                    }
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                let orders = await response.json();
+
+                // Filtrar se houver termo de busca
+                if (searchTerm) {
+                    const lowerSearchTerm = searchTerm.toLowerCase();
+                    orders = orders.filter(order =>
+                        order.id.toLowerCase().includes(lowerSearchTerm) ||
+                        order.nomeCliente.toLowerCase().includes(lowerSearchTerm) ||
+                        order.telefone.includes(searchTerm) // Telefone geralmente não diferencia maiúsc/minúsc
+                    );
+                }
+
+                displayOrders(orders);
+            } catch (error) {
+                console.error('Erro ao buscar pedidos:', error);
+                showNotification('Erro ao carregar pedidos.', 'error');
+                // Se o erro for 401, o checkSession já deve ter tratado
+            }
+        }
+
+        function displayOrders(orders) {
+            ordersTbody.innerHTML = ''; // Limpa tabela
+            if (!Array.isArray(orders)) {
+                console.error('Formato de pedidos inválido:', orders);
+                showNotification('Recebido formato de pedidos inválido do servidor.', 'error');
+                return;
+            }
+            orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Ordena por mais recente
+
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                const statusClass = `status-${order.status.toLowerCase().replace(' ', '-').replace('ç', 'c').replace('ã', 'a')}`;
+
+                row.innerHTML = `
+                    <td>${order.id.substring(0, 8)}...</td>
+                    <td>${escapeHtml(order.nomeCliente)}</td>
+                    <td>${escapeHtml(order.telefone)}</td>
+                    <td><span class="status-badge ${statusClass}">${escapeHtml(order.status)}</span></td>
+                    <td>${new Date(order.timestamp).toLocaleString('pt-BR')}</td>
+                    <td>
+                        <button class="action-btn details-btn" onclick='openModal(${JSON.stringify(order)})'>Detalhes</button>
+                        ${currentUserRole === 'admin' ? `<button class="action-btn delete-btn admin-only" onclick="deleteOrder('${order.id}')">Excluir</button>` : ''}
+                    </td>
                 `;
-                
-                notificationLogElement.appendChild(logEntry);
+                ordersTbody.appendChild(row);
             });
         }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const response = await fetch('/api/pedidos/update-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId, newStatus })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    showNotification(`Status do pedido ${orderId.substring(0, 8)} atualizado para ${newStatus}.`, 'success');
+                    fetchOrders(searchInput.value); // Atualiza a lista
+                    closeModal();
+                } else {
+                     if (response.status === 401) { showLogin(); loginError.textContent = 'Sessão expirada.'; return; }
+                    showNotification(data.message || 'Erro ao atualizar status.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar status:', error);
+                showNotification('Erro de conexão ao atualizar status.', 'error');
+            }
+        }
+
+        async function deleteOrder(orderId) {
+            if (!confirm(`Tem certeza que deseja excluir o pedido ${orderId.substring(0, 8)}? Esta ação não pode ser desfeita.`)) {
+                return;
+            }
+            try {
+                const response = await fetch(`/api/pedidos/${orderId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    showNotification(`Pedido ${orderId.substring(0, 8)} excluído com sucesso.`, 'success');
+                    fetchOrders(searchInput.value); // Atualiza a lista
+                } else {
+                    if (response.status === 401) { showLogin(); loginError.textContent = 'Sessão expirada.'; return; }
+                    if (response.status === 403) { showNotification('Acesso negado. Somente administradores podem excluir pedidos.', 'error'); return; }
+                    showNotification(data.message || 'Erro ao excluir pedido.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao excluir pedido:', error);
+                showNotification('Erro de conexão ao excluir pedido.', 'error');
+            }
+        }
+
+        // --- Funções do Modal ---
+        function openModal(order) {
+            document.getElementById('modalOrderId').textContent = order.id.substring(0, 8) + '...';
+            document.getElementById('modalClientName').textContent = escapeHtml(order.nomeCliente);
+            document.getElementById('modalClientPhone').textContent = escapeHtml(order.telefone);
+            document.getElementById('modalClientAddress').textContent = escapeHtml(order.endereco);
+            document.getElementById('modalTotalValue').textContent = `R$ ${order.valorTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('modalPaymentMethod').textContent = escapeHtml(order.formaPagamento);
+            document.getElementById('modalCurrentStatus').textContent = escapeHtml(order.status);
+            document.getElementById('modalTimestamp').textContent = new Date(order.timestamp).toLocaleString('pt-BR');
+
+            const productsList = document.getElementById('modalProducts');
+            productsList.innerHTML = '';
+            if (Array.isArray(order.produtos)) {
+                order.produtos.forEach(prod => {
+                    const li = document.createElement('li');
+                    li.textContent = escapeHtml(prod);
+                    productsList.appendChild(li);
+                });
+            } else if (typeof order.produtos === 'string') { // Caso ainda venha como string
+                 const li = document.createElement('li');
+                 li.textContent = escapeHtml(order.produtos);
+                 productsList.appendChild(li);
+            }
+
+            // Adiciona orderId aos botões de status
+            document.querySelectorAll('.status-btn').forEach(btn => btn.dataset.orderId = order.id);
+
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+        // Fecha modal se clicar fora
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // --- Funções de Auto-Refresh e Busca ---
+        function startAutoRefresh() {
+            stopAutoRefresh(); // Garante que não haja múltiplos intervalos
+            const intervalSeconds = parseInt(autoRefreshIntervalSelect.value);
+            if (intervalSeconds > 0) {
+                autoRefreshIntervalId = setInterval(() => {
+                    fetchOrders(searchInput.value);
+                    console.log(`Pedidos atualizados automaticamente (${intervalSeconds}s)`);
+                }, intervalSeconds * 1000);
+            }
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshIntervalId) {
+                clearInterval(autoRefreshIntervalId);
+                autoRefreshIntervalId = null;
+            }
+        }
+
+        refreshBtn.addEventListener('click', () => fetchOrders(searchInput.value));
+        autoRefreshIntervalSelect.addEventListener('change', startAutoRefresh);
+        searchBtn.addEventListener('click', () => fetchOrders(searchInput.value));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                fetchOrders(searchInput.value);
+            }
+        });
+
+        // --- Funções das Abas ---
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class de todas as abas e conteúdos
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                // Adiciona active class à aba clicada e ao conteúdo correspondente
+                tab.classList.add('active');
+                const targetContentId = tab.getAttribute('data-tab');
+                document.getElementById(targetContentId).classList.add('active');
+            });
+        });
+
+        // --- Funções de Configuração (Admin) ---
+        async function loadConfig() {
+            if (currentUserRole !== 'admin') return;
+            try {
+                const response = await fetch('/api/config');
+                 if (!response.ok) {
+                    if (response.status === 401) { showLogin(); loginError.textContent = 'Sessão expirada.'; return; }
+                    if (response.status === 403) { showNotification('Acesso negado às configurações.', 'error'); return; }
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                const config = await response.json();
+                document.getElementById('webhookUrlNovoPedido').value = config.webhookUrlNovoPedido || '';
+                document.getElementById('webhookUrlAtualizacaoStatus').value = config.webhookUrlAtualizacaoStatus || '';
+                document.getElementById('apiKey').value = config.apiKey || '';
+            } catch (error) {
+                console.error('Erro ao carregar configurações:', error);
+                showNotification('Erro ao carregar configurações.', 'error');
+            }
+        }
+
+        configForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            configMessage.textContent = '';
+            const webhookUrlNovoPedido = document.getElementById('webhookUrlNovoPedido').value;
+            const webhookUrlAtualizacaoStatus = document.getElementById('webhookUrlAtualizacaoStatus').value;
+            const apiKey = document.getElementById('apiKey').value;
+
+            try {
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ webhookUrlNovoPedido, webhookUrlAtualizacaoStatus, apiKey })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    configMessage.textContent = 'Configurações salvas com sucesso!';
+                    configMessage.style.color = 'var(--success-color)';
+                    showNotification('Configurações salvas!', 'success');
+                } else {
+                    if (response.status === 401) { showLogin(); loginError.textContent = 'Sessão expirada.'; return; }
+                    if (response.status === 403) { showNotification('Acesso negado. Somente administradores podem salvar configurações.', 'error'); return; }
+                    configMessage.textContent = data.message || 'Erro ao salvar configurações.';
+                    configMessage.style.color = 'var(--danger-color)';
+                }
+            } catch (error) {
+                console.error('Erro ao salvar configurações:', error);
+                configMessage.textContent = 'Erro de conexão ao salvar configurações.';
+                configMessage.style.color = 'var(--danger-color)';
+            }
+        });
+
+        // --- Utils ---
+        function escapeHtml(unsafe) {
+            if (unsafe === null || typeof unsafe === 'undefined') return '';
+            return String(unsafe)
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        // --- Inicialização ---
+        document.addEventListener('DOMContentLoaded', checkSession);
+
     </script>
 </body>
 </html>
