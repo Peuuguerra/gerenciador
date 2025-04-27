@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
 const session = require("express-session"); // Importar express-session
+const n8nIntegration = require("./n8n-integration"); // **ADICIONADO:** Importar módulo de integração n8n
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,7 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // **NOVA CONFIGURAÇÃO:** Confiar no primeiro proxy (importante para Render, Heroku, etc.)
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 // Configuração da Sessão
 // const isProduction = process.env.NODE_ENV === "production"; // Temporariamente comentado
@@ -24,11 +25,11 @@ app.use(session({
   saveUninitialized: false, // Não salva sessões não inicializadas
   cookie: {
     // **MODIFICADO:** Forçar secure: false para teste, ignorando NODE_ENV por enquanto
-    secure: false, 
+    secure: false,
     httpOnly: true, // Ajuda a prevenir ataques XSS
-    maxAge: 1000 * 60 * 60 * 24 // Tempo de vida do cookie (ex: 24 horas)
+    maxAge: 1000 * 60 * 60 * 24, // Tempo de vida do cookie (ex: 24 horas)
     // sameSite: 'lax' // Pode adicionar para proteção CSRF, mas teste se não quebra nada
-  }
+  },
 }));
 
 // Garantir que os diretórios necessários existam
@@ -54,7 +55,7 @@ if (!fs.existsSync(pedidosFile)) {
 // Credenciais de Usuário (em um cenário real, use um banco de dados)
 const users = {
   admin: { password: "admin123", role: "admin" },
-  funcionario: { password: "funcionario123", role: "funcionario" }
+  funcionario: { password: "funcionario123", role: "funcionario" },
 };
 
 // Função para gerar ID único
@@ -68,7 +69,9 @@ function requireLogin(req, res, next) {
     return next(); // Usuário está logado, continua
   } else {
     console.warn("Tentativa de acesso não autorizado (sem sessão):");
-    return res.status(401).json({ error: "Acesso não autorizado. Faça login primeiro." });
+    return res
+      .status(401)
+      .json({ error: "Acesso não autorizado. Faça login primeiro." });
   }
 }
 
@@ -76,15 +79,21 @@ function requireLogin(req, res, next) {
 function requireAdmin(req, res, next) {
   // Primeiro, verifica se está logado
   if (!req.session || !req.session.user) {
-      console.warn("Tentativa de acesso admin não autorizado (sem sessão):");
-      return res.status(401).json({ error: "Acesso não autorizado. Faça login primeiro." });
+    console.warn("Tentativa de acesso admin não autorizado (sem sessão):");
+    return res
+      .status(401)
+      .json({ error: "Acesso não autorizado. Faça login primeiro." });
   }
   // Depois, verifica a role
   if (req.session.user.role === "admin") {
     return next(); // Usuário é admin, continua
   } else {
-    console.warn(`Tentativa de acesso admin não autorizado (usuário: ${req.session.user.username}, role: ${req.session.user.role}):`);
-    return res.status(403).json({ error: "Acesso proibido. Requer privilégios de administrador." });
+    console.warn(
+      `Tentativa de acesso admin não autorizado (usuário: ${req.session.user.username}, role: ${req.session.user.role}):`
+    );
+    return res
+      .status(403)
+      .json({ error: "Acesso proibido. Requer privilégios de administrador." });
   }
 }
 
@@ -99,16 +108,24 @@ app.post("/login", (req, res) => {
     // Credenciais corretas - Inicia a sessão
     req.session.user = {
       username: username,
-      role: user.role
+      role: user.role,
     };
     // Garante que a sessão seja salva antes de responder
-    req.session.save(err => {
-        if (err) {
-            console.error("Erro ao salvar sessão após login:", err);
-            return res.status(500).json({ success: false, message: "Erro interno ao iniciar sessão." });
-        }
-        console.log(`Usuário ${username} logado com sucesso. Sessão ID: ${req.sessionID}`);
-        res.json({ success: true, message: "Login bem-sucedido!", user: req.session.user });
+    req.session.save((err) => {
+      if (err) {
+        console.error("Erro ao salvar sessão após login:", err);
+        return res
+          .status(500)
+          .json({ success: false, message: "Erro interno ao iniciar sessão." });
+      }
+      console.log(
+        `Usuário ${username} logado com sucesso. Sessão ID: ${req.sessionID}`
+      );
+      res.json({
+        success: true,
+        message: "Login bem-sucedido!",
+        user: req.session.user,
+      });
     });
   } else {
     // Credenciais inválidas
@@ -122,7 +139,7 @@ app.get("/logout", (req, res) => {
   if (req.session.user) {
     const username = req.session.user.username;
     const sessionId = req.sessionID;
-    req.session.destroy(err => {
+    req.session.destroy((err) => {
       if (err) {
         console.error("Erro ao destruir sessão:", err);
         return res.status(500).json({ error: "Erro ao fazer logout." });
@@ -147,7 +164,7 @@ app.get("/session", (req, res) => {
   }
 });
 
-// --- Rotas da API de Pedidos (Protegidas) ---
+// --- Rotas da API de Pedidos (Protegidas e Não Protegidas) ---
 
 // Rota para obter todos os pedidos (GET) - Protegida por Login
 app.get("/api/pedidos/get-orders", requireLogin, (req, res) => {
@@ -167,7 +184,13 @@ app.post("/api/pedidos/get-orders", (req, res) => {
     console.log("Recebido pedido:", req.body);
     const data = fs.readFileSync(pedidosFile, "utf8");
     const pedidos = JSON.parse(data);
-    const { Cliente, Telefone, Endereço, Produtos, "Forma de Pagamento": formaPagamento } = req.body;
+    const {
+      Cliente,
+      Telefone,
+      Endereço,
+      Produtos,
+      "Forma de Pagamento": formaPagamento,
+    } = req.body;
     const novoPedido = {
       id: generateOrderId(),
       nomeCliente: Cliente,
@@ -177,16 +200,29 @@ app.post("/api/pedidos/get-orders", (req, res) => {
       valorTotal: calcularValorTotal(Produtos),
       status: "Pedido Recebido",
       timestamp: new Date().toISOString(),
-      formaPagamento: formaPagamento
+      formaPagamento: formaPagamento,
     };
     pedidos.push(novoPedido);
     fs.writeFileSync(pedidosFile, JSON.stringify(pedidos, null, 2));
-    const logMessage = `[${new Date().toISOString()}] Novo pedido: ${JSON.stringify(novoPedido)}\n`;
+    const logMessage = `[${new Date().toISOString()}] Novo pedido: ${JSON.stringify(
+      novoPedido
+    )}\n`;
     fs.appendFileSync(path.join(dataDir, "pedidos.log"), logMessage);
-    res.status(201).json({ 
-      success: true, 
+
+    // **ADICIONADO:** Notificar o n8n sobre o novo pedido
+    n8nIntegration
+      .notificarNovoPedido(novoPedido)
+      .then((response) => {
+        console.log("Notificação de novo pedido enviada para n8n com sucesso");
+      })
+      .catch((error) => {
+        console.error("Erro ao notificar n8n sobre novo pedido:", error);
+      });
+
+    res.status(201).json({
+      success: true,
       message: "Pedido recebido com sucesso",
-      pedido: novoPedido
+      pedido: novoPedido,
     });
   } catch (error) {
     console.error("Erro ao salvar pedido:", error);
@@ -197,19 +233,22 @@ app.post("/api/pedidos/get-orders", (req, res) => {
 // Função simples para calcular valor total baseado na descrição do produto
 function calcularValorTotal(descricaoProdutos) {
   let valor = 15.0;
-  const produtosArray = Array.isArray(descricaoProdutos) ? descricaoProdutos : [descricaoProdutos];
-  produtosArray.forEach(produto => {
-      if (typeof produto === "string") { // Garante que é string
-          const lowerProduto = produto.toLowerCase();
-          if (lowerProduto.includes("g")) valor += 5.0;
-          else if (lowerProduto.includes("m")) valor += 3.0;
-          // Se não for G nem M, assume P (sem custo extra)
-          
-          if (lowerProduto.includes("leite condensado")) valor += 2.0;
-          if (lowerProduto.includes("morango")) valor += 2.0;
-          if (lowerProduto.includes("banana")) valor += 1.5;
-          if (lowerProduto.includes("granola")) valor += 1.0;
-      }
+  const produtosArray = Array.isArray(descricaoProdutos)
+    ? descricaoProdutos
+    : [descricaoProdutos];
+  produtosArray.forEach((produto) => {
+    if (typeof produto === "string") {
+      // Garante que é string
+      const lowerProduto = produto.toLowerCase();
+      if (lowerProduto.includes("g")) valor += 5.0;
+      else if (lowerProduto.includes("m")) valor += 3.0;
+      // Se não for G nem M, assume P (sem custo extra)
+
+      if (lowerProduto.includes("leite condensado")) valor += 2.0;
+      if (lowerProduto.includes("morango")) valor += 2.0;
+      if (lowerProduto.includes("banana")) valor += 1.5;
+      if (lowerProduto.includes("granola")) valor += 1.0;
+    }
   });
   return parseFloat(valor.toFixed(2));
 }
@@ -220,23 +259,32 @@ app.post("/api/pedidos/update-status", requireLogin, (req, res) => {
     const { orderId, newStatus } = req.body;
     const data = fs.readFileSync(pedidosFile, "utf8");
     let pedidos = JSON.parse(data);
-    const pedidoIndex = pedidos.findIndex(p => p.id === orderId);
+    const pedidoIndex = pedidos.findIndex((p) => p.id === orderId);
     if (pedidoIndex !== -1) {
       const oldStatus = pedidos[pedidoIndex].status;
       pedidos[pedidoIndex].status = newStatus;
       fs.writeFileSync(pedidosFile, JSON.stringify(pedidos, null, 2));
       const logMessage = `[${new Date().toISOString()}] Status atualizado por ${req.session.user.username}: Pedido ${orderId} de ${oldStatus} para ${newStatus}\n`;
       fs.appendFileSync(path.join(dataDir, "atualizacoes.log"), logMessage);
-      
-      // Lógica de notificação (exemplo, pode precisar de ajuste)
-      // notificarAtualizacaoStatus(pedidos[pedidoIndex], oldStatus, newStatus);
-      
-      res.json({ 
-        success: true, 
+
+      // **DESCOMENTADO E AJUSTADO:** Notificar o n8n sobre a atualização de status
+      n8nIntegration
+        .notificarAtualizacaoStatus(pedidos[pedidoIndex], oldStatus, newStatus)
+        .then((response) => {
+          console.log(
+            "Notificação de atualização enviada para n8n com sucesso"
+          );
+        })
+        .catch((error) => {
+          console.error("Erro ao notificar n8n sobre atualização:", error);
+        });
+
+      res.json({
+        success: true,
         message: "Status atualizado com sucesso",
         orderId: orderId,
         oldStatus: oldStatus,
-        newStatus: newStatus
+        newStatus: newStatus,
       });
     } else {
       res.status(404).json({ success: false, message: "Pedido não encontrado" });
@@ -253,15 +301,21 @@ app.delete("/api/pedidos/:orderId", requireAdmin, (req, res) => {
     const { orderId } = req.params;
     const data = fs.readFileSync(pedidosFile, "utf8");
     let pedidos = JSON.parse(data);
-    const pedidoIndex = pedidos.findIndex(p => p.id === orderId);
+    const pedidoIndex = pedidos.findIndex((p) => p.id === orderId);
 
     if (pedidoIndex !== -1) {
       const pedidoRemovido = pedidos.splice(pedidoIndex, 1)[0]; // Remove o pedido
       fs.writeFileSync(pedidosFile, JSON.stringify(pedidos, null, 2));
-      const logMessage = `[${new Date().toISOString()}] Pedido removido por ${req.session.user.username}: ${JSON.stringify(pedidoRemovido)}\n`;
+      const logMessage = `[${new Date().toISOString()}] Pedido removido por ${req.session.user.username}: ${JSON.stringify(
+        pedidoRemovido
+      )}\n`;
       fs.appendFileSync(path.join(dataDir, "pedidos_removidos.log"), logMessage);
       console.log(`Pedido ${orderId} removido por ${req.session.user.username}`);
-      res.json({ success: true, message: "Pedido removido com sucesso", orderId: orderId });
+      res.json({
+        success: true,
+        message: "Pedido removido com sucesso",
+        orderId: orderId,
+      });
     } else {
       res.status(404).json({ success: false, message: "Pedido não encontrado" });
     }
@@ -271,11 +325,17 @@ app.delete("/api/pedidos/:orderId", requireAdmin, (req, res) => {
   }
 });
 
-
 // Rota para configurações (ex: URLs de webhook) - Protegida por Admin
 const configFile = path.join(dataDir, "config.json");
 if (!fs.existsSync(configFile)) {
-  fs.writeFileSync(configFile, JSON.stringify({ webhookUrlNovoPedido: "", webhookUrlAtualizacaoStatus: "", apiKey: "" }));
+  fs.writeFileSync(
+    configFile,
+    JSON.stringify({
+      webhookUrlNovoPedido: "",
+      webhookUrlAtualizacaoStatus: "",
+      apiKey: "",
+    })
+  );
 }
 
 app.get("/api/config", requireAdmin, (req, res) => {
@@ -291,7 +351,11 @@ app.get("/api/config", requireAdmin, (req, res) => {
 app.post("/api/config", requireAdmin, (req, res) => {
   try {
     const { webhookUrlNovoPedido, webhookUrlAtualizacaoStatus, apiKey } = req.body;
-    const newConfig = { webhookUrlNovoPedido, webhookUrlAtualizacaoStatus, apiKey };
+    const newConfig = {
+      webhookUrlNovoPedido,
+      webhookUrlAtualizacaoStatus,
+      apiKey,
+    };
     fs.writeFileSync(configFile, JSON.stringify(newConfig, null, 2));
     console.log(`Configurações salvas por ${req.session.user.username}`);
     res.json({ success: true, message: "Configurações salvas com sucesso" });
@@ -301,28 +365,30 @@ app.post("/api/config", requireAdmin, (req, res) => {
   }
 });
 
-
 // Rota para enviar notificação (POST) - Exemplo, ajustar conforme necessidade
 // Esta rota pode precisar de autenticação dependendo de quem a chama
 app.post("/api/pedidos/notificar", (req, res) => {
   try {
     const { orderId, telefone, nomeCliente, oldStatus, newStatus } = req.body;
     // Lógica para determinar a mensagem baseada no status
-    let mensagem = `Olá ${nomeCliente}! O status do seu pedido #${orderId.substring(0, 8)} foi atualizado para ${newStatus}.`;
+    let mensagem = `Olá ${nomeCliente}! O status do seu pedido #${orderId.substring(
+      0,
+      8
+    )} foi atualizado para ${newStatus}.`;
     // ... (adicionar casos específicos como no código original se necessário)
-    
+
     console.log(`Simulando envio de notificação para ${telefone}: "${mensagem}"`);
     const logMessage = `[${new Date().toISOString()}] Notificação para ${telefone}: "${mensagem}"\n`;
     fs.appendFileSync(path.join(dataDir, "notificacoes.log"), logMessage);
-    
+
     // Aqui você chamaria a API de notificação real (ex: WhatsApp, SMS)
     // Ex: await enviarNotificacaoReal(telefone, mensagem);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: "Notificação (simulada) enviada com sucesso",
       telefone: telefone,
-      mensagem: mensagem
+      mensagem: mensagem,
     });
   } catch (error) {
     console.error("Erro ao processar notificação:", error);
@@ -348,5 +414,7 @@ app.get("*/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor Mr. Shake rodando na porta ${PORT}`);
   // Aviso sobre cookie não seguro (para lembrar de mudar em produção)
-  console.warn("AVISO: Cookie de sessão configurado como secure: false para teste. Mude para secure: true em produção com HTTPS.");
+  console.warn(
+    "AVISO: Cookie de sessão configurado como secure: false para teste. Mude para secure: true em produção com HTTPS."
+  );
 });
