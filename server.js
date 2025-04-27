@@ -184,24 +184,32 @@ app.post("/api/pedidos/get-orders", (req, res) => {
     console.log("Recebido pedido:", req.body);
     const data = fs.readFileSync(pedidosFile, "utf8");
     const pedidos = JSON.parse(data);
-    const {
-      Cliente,
-      Telefone,
-      Endereço,
-      Produtos,
-      "Forma de Pagamento": formaPagamento,
-    } = req.body;
+    
+    // **MODIFICADO:** Usar valores vazios se não forem enviados
+    const Cliente = req.body.Cliente || ""; 
+    const Telefone = req.body.Telefone || "";
+    const Endereco = req.body.Endereço || ""; // Usar string vazia se não houver Endereço
+    const ProdutosInput = req.body.Produtos; // Pega o input de produtos
+    const formaPagamento = req.body["Forma de Pagamento"] || "";
+
+    // **MODIFICADO:** Tratar ProdutosInput para ser array vazio se não houver input
+    let produtosArray = [];
+    if (ProdutosInput) {
+        produtosArray = Array.isArray(ProdutosInput) ? ProdutosInput : [ProdutosInput];
+    }
+
     const novoPedido = {
       id: generateOrderId(),
       nomeCliente: Cliente,
       telefone: Telefone,
-      endereco: Endereço,
-      produtos: Array.isArray(Produtos) ? Produtos : [Produtos], // Garante que seja array
-      valorTotal: calcularValorTotal(Produtos),
+      endereco: Endereco, // Salva string vazia se não veio
+      produtos: produtosArray, // Salva array vazio se não veio
+      valorTotal: calcularValorTotal(produtosArray), // Calcula com base no array (que pode estar vazio)
       status: "Pedido Recebido",
       timestamp: new Date().toISOString(),
       formaPagamento: formaPagamento,
     };
+    
     pedidos.push(novoPedido);
     fs.writeFileSync(pedidosFile, JSON.stringify(pedidos, null, 2));
     const logMessage = `[${new Date().toISOString()}] Novo pedido: ${JSON.stringify(
@@ -209,7 +217,7 @@ app.post("/api/pedidos/get-orders", (req, res) => {
     )}\n`;
     fs.appendFileSync(path.join(dataDir, "pedidos.log"), logMessage);
 
-    // **ADICIONADO:** Notificar o n8n sobre o novo pedido
+    // Notificar o n8n sobre o novo pedido
     n8nIntegration
       .notificarNovoPedido(novoPedido)
       .then((response) => {
@@ -231,11 +239,13 @@ app.post("/api/pedidos/get-orders", (req, res) => {
 });
 
 // Função simples para calcular valor total baseado na descrição do produto
-function calcularValorTotal(descricaoProdutos) {
-  let valor = 15.0;
-  const produtosArray = Array.isArray(descricaoProdutos)
-    ? descricaoProdutos
-    : [descricaoProdutos];
+function calcularValorTotal(produtosArray) { // **MODIFICADO:** Recebe o array diretamente
+  let valor = 15.0; // Valor base, ajustar se necessário
+  // Se o array estiver vazio, retorna o valor base
+  if (!produtosArray || produtosArray.length === 0) {
+      return parseFloat(valor.toFixed(2));
+  }
+  
   produtosArray.forEach((produto) => {
     if (typeof produto === "string") {
       // Garante que é string
@@ -248,6 +258,7 @@ function calcularValorTotal(descricaoProdutos) {
       if (lowerProduto.includes("morango")) valor += 2.0;
       if (lowerProduto.includes("banana")) valor += 1.5;
       if (lowerProduto.includes("granola")) valor += 1.0;
+      // Adicionar mais adicionais aqui se necessário
     }
   });
   return parseFloat(valor.toFixed(2));
@@ -267,7 +278,7 @@ app.post("/api/pedidos/update-status", requireLogin, (req, res) => {
       const logMessage = `[${new Date().toISOString()}] Status atualizado por ${req.session.user.username}: Pedido ${orderId} de ${oldStatus} para ${newStatus}\n`;
       fs.appendFileSync(path.join(dataDir, "atualizacoes.log"), logMessage);
 
-      // **DESCOMENTADO E AJUSTADO:** Notificar o n8n sobre a atualização de status
+      // Notificar o n8n sobre a atualização de status
       n8nIntegration
         .notificarAtualizacaoStatus(pedidos[pedidoIndex], oldStatus, newStatus)
         .then((response) => {
