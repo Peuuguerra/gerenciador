@@ -1,0 +1,46 @@
+# Mr. Shake - Sistema de Gerenciamento de Pedidos
+
+Sistema para gerenciar pedidos do Mr. Shake com integração via HTTP request para n8n.
+
+## Estrutura do Projeto
+
+- `server.js` - Servidor Express principal. Gerencia rotas de API para pedidos, autenticação e configurações.
+- `index.html` - Interface do usuário (frontend) para visualização e gerenciamento de pedidos, incluindo login e tela de configurações.
+- `n8n-integration.js` - Módulo responsável pela comunicação com o n8n. Envia notificações de novos pedidos e atualizações de status para os webhooks configurados.
+- `config.js` - **NOVO:** Módulo centralizado que define os caminhos para arquivos de configuração e dados, garantindo consistência em todo o sistema.
+- `notification-sound.js` - **NOVO:** Módulo que implementa o som de notificação para novos pedidos.
+- `notification.wav` - **NOVO:** Arquivo de som usado para alertar sobre novos pedidos.
+- `package.json` - Define as dependências do projeto Node.js.
+- `data/` - Diretório criado automaticamente para armazenar dados persistentes:
+    - `pedidos.json` - Armazena a lista de pedidos.
+    - `config.json` - Armazena as configurações de integração do n8n (URLs de webhook e chave de API). Este arquivo garante que as configurações persistam entre reinicializações do servidor.
+    - `pedidos.log`, `atualizacoes.log`, `pedidos_removidos.log`, `notificacoes.log` - Arquivos de log para rastreamento.
+- `README.md` - Este arquivo.
+- `deployment-guide.md` - Guia para implantação do sistema.
+- `server-integration.js` - Arquivo de exemplo (não diretamente usado pelo servidor) mostrando como integrar o `n8n-integration.js` no `server.js`.
+
+## Funcionalidades Principais
+
+- **Gerenciamento de Pedidos:** Visualizar, adicionar (via API), atualizar status e remover pedidos.
+- **Autenticação:** Sistema de login simples com papéis (admin, funcionário).
+- **Integração n8n:** Notifica o n8n sobre novos pedidos e atualizações de status.
+- **Configuração Persistente:** As URLs de webhook do n8n e a chave de API são salvas no arquivo `data/config.json` e carregadas na inicialização.
+- **Valor Total Dinâmico:** Ao receber um novo pedido via API (rota `/api/pedidos/get-orders`), o sistema agora prioriza o campo `ValorTotal` (ou `valorTotal`) enviado na requisição. Se este campo não for fornecido ou for inválido, o sistema definirá o valor total como `null` (sem calcular um valor internamente).
+- **Som de Notificação:** **NOVO:** O sistema reproduz um som de alerta quando novos pedidos são recebidos, para chamar a atenção do operador.
+
+## Como Usar
+
+1.  **Instalação:** Clone o repositório e execute `npm install` para instalar as dependências.
+2.  **Execução:** Execute `node server.js` para iniciar o servidor (porta padrão 10000).
+3.  **Acesso:** Abra o navegador e acesse `http://localhost:10000`.
+4.  **Login:** Use as credenciais padrão (ex: admin/admin123) ou as configuradas.
+5.  **Configuração (Admin):** Vá para a aba "Configurações" e insira as URLs dos webhooks do n8n e a chave de API. Salve as configurações.
+6.  **Gerenciamento:** Use a aba "Pedidos" para visualizar e gerenciar os pedidos.
+
+## Notas Técnicas
+
+- **Persistência de Configurações:** O sistema agora usa um módulo centralizado (`config.js`) para definir os caminhos dos arquivos de configuração, garantindo consistência entre todos os componentes.
+- **Som de Notificação:** O som é reproduzido automaticamente quando novos pedidos são detectados. Certifique-se de que o navegador permite a reprodução automática de áudio.
+- As credenciais de usuário estão codificadas em `server.js`. Para produção, use um método mais seguro.
+- O armazenamento de dados é feito em arquivos JSON na pasta `data/`. Para maior escalabilidade e confiabilidade, considere usar um banco de dados.
+- Consulte `deployment-guide.md` para opções de implantação.
