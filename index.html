@@ -531,10 +531,14 @@
             }
             orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Ordena por mais recente
 
+            // **NOVO:** Armazenar pedidos globalmente para acesso no event listener
+            window.currentOrders = orders;
+
             orders.forEach(order => {
                 const row = document.createElement('tr');
                 const statusClass = `status-${order.status.toLowerCase().replace(' ', '-').replace('ç', 'c').replace('ã', 'a')}`;
 
+                // **MODIFICADO:** Usar data attribute para o ID e remover onclick inline
                 row.innerHTML = `
                     <td>${order.id.substring(0, 8)}...</td>
                     <td>${escapeHtml(order.nomeCliente)}</td>
@@ -542,8 +546,8 @@
                     <td><span class="status-badge ${statusClass}">${escapeHtml(order.status)}</span></td>
                     <td>${new Date(order.timestamp).toLocaleString('pt-BR')}</td>
                     <td>
-                        <button class="action-btn details-btn" onclick='openModal(${JSON.stringify(order)})'>Detalhes</button>
-                        ${currentUserRole === 'admin' ? `<button class="action-btn delete-btn admin-only" onclick="deleteOrder('${order.id}')">Excluir</button>` : ''}
+                        <button class="action-btn details-btn" data-order-id="${order.id}">Detalhes</button>
+                        ${currentUserRole === 'admin' ? `<button class="action-btn delete-btn admin-only" data-order-id="${order.id}">Excluir</button>` : ''}
                     </td>
                 `;
                 ordersTbody.appendChild(row);
@@ -741,7 +745,32 @@
         }
 
         // --- Inicialização ---
-        document.addEventListener('DOMContentLoaded', checkSession);
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            
+            // **NOVO:** Event listener para botões de detalhes e exclusão
+            document.addEventListener('click', function(e) {
+                // Botão de detalhes
+                if (e.target.classList.contains('details-btn')) {
+                    const orderId = e.target.getAttribute('data-order-id');
+                    const order = window.currentOrders.find(o => o.id === orderId);
+                    if (order) {
+                        openModal(order);
+                    } else {
+                        console.error('Pedido não encontrado:', orderId);
+                        showNotification('Erro ao abrir detalhes do pedido.', 'error');
+                    }
+                }
+                
+                // Botão de exclusão
+                if (e.target.classList.contains('delete-btn')) {
+                    const orderId = e.target.getAttribute('data-order-id');
+                    if (orderId) {
+                        deleteOrder(orderId);
+                    }
+                }
+            });
+        });
 
         // Função para verificar novos pedidos e tocar som de notificação
         // Definida diretamente aqui para garantir disponibilidade
