@@ -4,10 +4,11 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
 const session = require("express-session"); // Importar express-session
-const n8nIntegration = require("./n8n-integration"); // **ADICIONADO:** Importar módulo de integração n8n
+const { dataDir, configFile, pedidosFile } = require("./config"); // **NOVO:** Importar caminhos centralizados
+const n8nIntegration = require("./n8n-integration"); // Importar módulo de integração n8n
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000; // **MODIFICADO:** Porta padrão alterada para 10000
 
 // Middleware
 app.use(cors()); // Habilitar CORS para todas as origens (ajustar em produção se necessário)
@@ -38,18 +39,16 @@ if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
 
-// Diretório para armazenar os dados
-const dataDir = path.join(__dirname, "data");
+// Garantir que o diretório de dados exista
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
+  console.log(`Diretório de dados criado em: ${dataDir}`);
 }
-
-// Arquivo para armazenar os pedidos
-const pedidosFile = path.join(dataDir, "pedidos.json");
 
 // Inicializar o arquivo de pedidos se não existir
 if (!fs.existsSync(pedidosFile)) {
   fs.writeFileSync(pedidosFile, JSON.stringify([]));
+  console.log(`Arquivo de pedidos inicializado em: ${pedidosFile}`);
 }
 
 // Credenciais de Usuário (em um cenário real, use um banco de dados)
@@ -198,13 +197,24 @@ app.post("/api/pedidos/get-orders", (req, res) => {
         produtosArray = Array.isArray(ProdutosInput) ? ProdutosInput : [ProdutosInput];
     }
 
+    // **MODIFICADO:** Usar valor total do n8n se disponível, senão definir como null
+    let valorTotalPedido = null; // Define como null por padrão
+    const valorTotalInput = req.body['ValorTotal'] || req.body.valorTotal; // Tenta pegar 'ValorTotal' ou 'valorTotal'
+    if (valorTotalInput !== undefined && !isNaN(parseFloat(valorTotalInput))) {
+        valorTotalPedido = parseFloat(valorTotalInput);
+        console.log(`Usando ValorTotal recebido: ${valorTotalPedido}`);
+    } else {
+        // Não calcula mais fallback, mantém como null
+        console.log(`ValorTotal não recebido ou inválido. Definido como null.`);
+    }
+
     const novoPedido = {
       id: generateOrderId(),
       nomeCliente: Cliente,
       telefone: Telefone,
       endereco: Endereco, // Salva string vazia se não veio
       produtos: produtosArray, // Salva array vazio se não veio
-      valorTotal: calcularValorTotal(produtosArray), // Calcula com base no array (que pode estar vazio)
+      valorTotal: valorTotalPedido, // Usa o valor determinado acima (pode ser null)
       status: "Pedido Recebido",
       timestamp: new Date().toISOString(),
       formaPagamento: formaPagamento,
@@ -337,17 +347,8 @@ app.delete("/api/pedidos/:orderId", requireAdmin, (req, res) => {
 });
 
 // Rota para configurações (ex: URLs de webhook) - Protegida por Admin
-const configFile = path.join(dataDir, "config.json");
-if (!fs.existsSync(configFile)) {
-  fs.writeFileSync(
-    configFile,
-    JSON.stringify({
-      webhookUrlNovoPedido: "",
-      webhookUrlAtualizacaoStatus: "",
-      apiKey: "",
-    })
-  );
-}
+// **REMOVIDO:** Definição duplicada de configFile, agora importado de ./config
+// if (!fs.existsSync(configFile)) { ... } // Verificação/criação agora feita no n8n-integration.js
 
 app.get("/api/config", requireAdmin, (req, res) => {
   try {
