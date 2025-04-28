@@ -511,6 +511,9 @@
                     );
                 }
 
+                // **NOVO:** Verificar se há novos pedidos
+                checkForNewOrders(orders);
+
                 displayOrders(orders);
             } catch (error) {
                 console.error('Erro ao buscar pedidos:', error);
@@ -743,3 +746,6 @@
     </script>
 </body>
 </html>
+
+        <script src="notification-sound.js"></script>
+    </head>
