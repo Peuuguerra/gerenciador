@@ -3,62 +3,93 @@
 
 const fs = require("fs");
 const path = require("path");
+const { dataDir, configFile } = require("./config"); // **NOVO:** Importar caminhos centralizados
 
-// **MODIFICADO:** Ler configurações do arquivo config.json
-const dataDir = path.join(__dirname, "data");
-const configFile = path.join(dataDir, "config.json");
-
-let n8nConfig = {
-  webhookUrlNovoPedido: "", // Será lido do arquivo
-  webhookUrlAtualizacaoStatus: "", // Será lido do arquivo
-  apiKey: "", // Será lido do arquivo
-  enviarNotificacoesAutomaticas: true, // Manter como padrão ou ler do arquivo se necessário
-};
-
-try {
-  if (fs.existsSync(configFile)) {
-    const configData = fs.readFileSync(configFile, "utf8");
-    const loadedConfig = JSON.parse(configData);
-    // Atualiza as URLs e a chave de API com os valores do arquivo
-    n8nConfig.webhookUrlNovoPedido = loadedConfig.webhookUrlNovoPedido || "";
-    n8nConfig.webhookUrlAtualizacaoStatus = loadedConfig.webhookUrlAtualizacaoStatus || "";
-    n8nConfig.apiKey = loadedConfig.apiKey || "";
-    console.log("Configurações do n8n carregadas de config.json");
-  } else {
-    console.warn("Arquivo config.json não encontrado em /data. Usando URLs vazias para n8n.");
+// **MODIFICADO:** Garantir que o diretório de dados exista (usando dataDir importado)
+if (!fs.existsSync(dataDir)) {
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+    console.log(`Diretório de dados criado em: ${dataDir}`);
+  } catch (error) {
+    console.error(`Erro ao criar diretório de dados ${dataDir}:`, error);
+    // Lidar com o erro, talvez continuar com configurações padrão?
   }
-} catch (error) {
-  console.error("Erro ao ler config.json para integração n8n:", error);
+}
+
+// **MODIFICADO:** Inicializar o arquivo de configuração se não existir (usando configFile importado)
+if (!fs.existsSync(configFile)) {
+  try {
+    fs.writeFileSync(
+      configFile,
+      JSON.stringify({
+        webhookUrlNovoPedido: "",
+        webhookUrlAtualizacaoStatus: "",
+        apiKey: "",
+      }, null, 2) // Adiciona formatação para legibilidade
+    );
+    console.log(`Arquivo de configuração inicial criado em: ${configFile}`);
+  } catch (error) {
+     console.error(`Erro ao criar arquivo de configuração inicial ${configFile}:`, error);
+  }
 }
 
 
-// Função para recarregar configurações (pode ser útil se o config.json mudar sem reiniciar o servidor)
-function reloadN8nConfig() {
+let n8nConfig = {
+  webhookUrlNovoPedido: "",
+  webhookUrlAtualizacaoStatus: "",
+  apiKey: "",
+  enviarNotificacoesAutomaticas: true, // Manter como padrão ou ler do arquivo se necessário
+};
+
+// **MODIFICADO:** Função unificada para carregar/recarregar configurações
+function loadN8nConfig() {
   try {
     if (fs.existsSync(configFile)) {
       const configData = fs.readFileSync(configFile, "utf8");
+      // Adiciona verificação para JSON vazio ou inválido
+      if (configData.trim() === "") {
+          console.warn(`Arquivo config.json (${configFile}) está vazio. Usando configurações padrão.`);
+          // Resetar para padrão se o arquivo estiver vazio
+          n8nConfig.webhookUrlNovoPedido = "";
+          n8nConfig.webhookUrlAtualizacaoStatus = "";
+          n8nConfig.apiKey = "";
+          return; // Sai da função após resetar
+      }
       const loadedConfig = JSON.parse(configData);
       n8nConfig.webhookUrlNovoPedido = loadedConfig.webhookUrlNovoPedido || "";
       n8nConfig.webhookUrlAtualizacaoStatus = loadedConfig.webhookUrlAtualizacaoStatus || "";
       n8nConfig.apiKey = loadedConfig.apiKey || "";
-      console.log("Configurações do n8n recarregadas.");
+      console.log(`Configurações do n8n carregadas/recarregadas de ${configFile}`);
     } else {
-       console.warn("Tentativa de recarregar config.json falhou: arquivo não encontrado.");
+      console.warn(`Arquivo config.json não encontrado em ${configFile}. Usando URLs vazias para n8n.`);
+      // Garante que as configurações sejam resetadas se o arquivo não for encontrado
+      n8nConfig.webhookUrlNovoPedido = "";
+      n8nConfig.webhookUrlAtualizacaoStatus = "";
+      n8nConfig.apiKey = "";
     }
   } catch (error) {
-    console.error("Erro ao recarregar config.json para integração n8n:", error);
+    console.error(`Erro ao ler/processar ${configFile} para integração n8n:`, error);
+    // Resetar para padrão em caso de erro de leitura/parse
+    n8nConfig.webhookUrlNovoPedido = "";
+    n8nConfig.webhookUrlAtualizacaoStatus = "";
+    n8nConfig.apiKey = "";
   }
 }
 
+// Carrega a configuração inicial quando o módulo é carregado
+loadN8nConfig();
+
+
 // Função para enviar notificação de novo pedido para o n8n
 async function notificarNovoPedido(pedido) {
-  reloadN8nConfig(); // Recarrega as configs antes de enviar
+  loadN8nConfig(); // Recarrega as configs antes de enviar
   if (!n8nConfig.enviarNotificacoesAutomaticas || !n8nConfig.webhookUrlNovoPedido) {
       if (!n8nConfig.webhookUrlNovoPedido) console.warn("URL do webhook de novo pedido não configurada. Notificação n8n não enviada.");
       return;
   }
-  
+
   try {
+    // **MODIFICADO:** Usar fetch global (disponível no Node 18+)
     const response = await fetch(n8nConfig.webhookUrlNovoPedido, {
       method: 'POST',
       headers: {
@@ -78,29 +109,33 @@ async function notificarNovoPedido(pedido) {
         }
       })
     });
-    
+
     console.log(`Notificação de novo pedido enviada para n8n (${n8nConfig.webhookUrlNovoPedido}). Status: ${response.status}`);
-    return response;
+    // Não retorna a response inteira, apenas loga o status
+    if (!response.ok) {
+        console.warn(`Resposta não OK (${response.status}) ao notificar novo pedido para n8n.`);
+    }
   } catch (error) {
     // Verifica se o erro é ENOTFOUND e dá uma mensagem mais clara
-    if (error.code === 'ENOTFOUND') {
-        console.error(`Erro ao enviar notificação para n8n: Não foi possível encontrar o host ${error.hostname}. Verifique a URL do webhook de novo pedido nas configurações.`);
+    if (error.cause && error.cause.code === 'ENOTFOUND') {
+        console.error(`Erro ao enviar notificação para n8n: Não foi possível encontrar o host ${error.cause.hostname}. Verifique a URL do webhook de novo pedido nas configurações.`);
     } else {
         console.error('Erro ao enviar notificação de novo pedido para n8n:', error);
     }
-    return null;
+    // Não retorna null, apenas loga o erro
   }
 }
 
 // Função para enviar notificação de atualização de status para o n8n
 async function notificarAtualizacaoStatus(pedido, statusAntigo, statusNovo) {
-  reloadN8nConfig(); // Recarrega as configs antes de enviar
+  loadN8nConfig(); // Recarrega as configs antes de enviar
   if (!n8nConfig.enviarNotificacoesAutomaticas || !n8nConfig.webhookUrlAtualizacaoStatus) {
       if (!n8nConfig.webhookUrlAtualizacaoStatus) console.warn("URL do webhook de atualização de status não configurada. Notificação n8n não enviada.");
       return;
   }
-  
+
   try {
+    // **MODIFICADO:** Usar fetch global
     const response = await fetch(n8nConfig.webhookUrlAtualizacaoStatus, {
       method: 'POST',
       headers: {
@@ -119,23 +154,24 @@ async function notificarAtualizacaoStatus(pedido, statusAntigo, statusNovo) {
         }
       })
     });
-    
+
     console.log(`Notificação de atualização de status enviada para n8n (${n8nConfig.webhookUrlAtualizacaoStatus}). Status: ${response.status}`);
-    return response;
+    if (!response.ok) {
+        console.warn(`Resposta não OK (${response.status}) ao notificar atualização de status para n8n.`);
+    }
   } catch (error) {
      // Verifica se o erro é ENOTFOUND e dá uma mensagem mais clara
-    if (error.code === 'ENOTFOUND') {
-        console.error(`Erro ao enviar notificação para n8n: Não foi possível encontrar o host ${error.hostname}. Verifique a URL do webhook de atualização de status nas configurações.`);
+    if (error.cause && error.cause.code === 'ENOTFOUND') {
+        console.error(`Erro ao enviar notificação para n8n: Não foi possível encontrar o host ${error.cause.hostname}. Verifique a URL do webhook de atualização de status nas configurações.`);
     } else {
         console.error('Erro ao enviar notificação de atualização para n8n:', error);
     }
-    return null;
+     // Não retorna null, apenas loga o erro
   }
 }
 
 module.exports = {
-  // n8nConfig, // Não precisa exportar o config diretamente
   notificarNovoPedido,
   notificarAtualizacaoStatus,
-  reloadN8nConfig // Exporta a função de recarregar, caso seja útil
+  // Não precisa mais exportar reloadN8nConfig separadamente
 };
