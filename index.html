@@ -601,39 +601,83 @@
 
         // --- Funções do Modal ---
         function openModal(order) {
-            document.getElementById('modalOrderId').textContent = order.id.substring(0, 8) + '...';
-            document.getElementById('modalClientName').textContent = escapeHtml(order.nomeCliente);
-            document.getElementById('modalClientPhone').textContent = escapeHtml(order.telefone);
-            document.getElementById('modalClientAddress').textContent = escapeHtml(order.endereco);
-            document.getElementById('modalTotalValue').textContent = `R$ ${order.valorTotal.toFixed(2).replace('.', ',')}`;
-            document.getElementById('modalPaymentMethod').textContent = escapeHtml(order.formaPagamento);
-            document.getElementById('modalCurrentStatus').textContent = escapeHtml(order.status);
-            document.getElementById('modalTimestamp').textContent = new Date(order.timestamp).toLocaleString('pt-BR');
+            console.log("Abrindo modal para o pedido:", order); // Log para depuração
+            try {
+                if (!order) {
+                    console.error("Tentativa de abrir modal com pedido inválido.");
+                    showNotification("Erro ao obter dados do pedido para detalhes.", "error");
+                    return;
+                }
 
-            const productsList = document.getElementById('modalProducts');
-            productsList.innerHTML = '';
-            if (Array.isArray(order.produtos)) {
-                order.produtos.forEach(prod => {
-                    const li = document.createElement('li');
-                    li.textContent = escapeHtml(prod);
+                document.getElementById("modalOrderId").textContent =
+                    order.id?.substring(0, 8) + "..." || "N/A";
+                document.getElementById("modalClientName").textContent =
+                    escapeHtml(order.nomeCliente) || "N/A";
+                document.getElementById("modalClientPhone").textContent =
+                    escapeHtml(order.telefone) || "N/A";
+                document.getElementById("modalClientAddress").textContent =
+                    escapeHtml(order.endereco) || "N/A";
+                
+                // **MODIFICADO:** Adicionar verificação para valorTotal antes de chamar toFixed
+                const valorTotalText = 
+                    (order.valorTotal !== null && typeof order.valorTotal !== "undefined")
+                    ? `R$ ${order.valorTotal.toFixed(2).replace(".", ",")}`
+                    : "N/A";
+                document.getElementById("modalTotalValue").textContent = valorTotalText;
+
+                document.getElementById("modalPaymentMethod").textContent =
+                    escapeHtml(order.formaPagamento) || "N/A";
+                document.getElementById("modalCurrentStatus").textContent =
+                    escapeHtml(order.status) || "N/A";
+                document.getElementById("modalTimestamp").textContent =
+                    order.timestamp
+                        ? new Date(order.timestamp).toLocaleString("pt-BR")
+                        : "N/A";
+
+                const productsList = document.getElementById("modalProducts");
+                productsList.innerHTML = ""; // Limpa lista anterior
+                if (Array.isArray(order.produtos)) {
+                    if (order.produtos.length > 0) {
+                        order.produtos.forEach((prod) => {
+                            const li = document.createElement("li");
+                            li.textContent = escapeHtml(prod);
+                            productsList.appendChild(li);
+                        });
+                    } else {
+                         const li = document.createElement("li");
+                         li.textContent = "Nenhum produto listado.";
+                         productsList.appendChild(li);
+                    }
+                } else if (typeof order.produtos === "string" && order.produtos.trim() !== "") {
+                    // Caso ainda venha como string
+                    const li = document.createElement("li");
+                    li.textContent = escapeHtml(order.produtos);
                     productsList.appendChild(li);
-                });
-            } else if (typeof order.produtos === 'string') { // Caso ainda venha como string
-                 const li = document.createElement('li');
-                 li.textContent = escapeHtml(order.produtos);
-                 productsList.appendChild(li);
+                } else {
+                     const li = document.createElement("li");
+                     li.textContent = "Nenhum produto listado.";
+                     productsList.appendChild(li);
+                }
+
+                // Adiciona orderId aos botões de status
+                document
+                    .querySelectorAll(".status-btn")
+                    .forEach((btn) => (btn.dataset.orderId = order.id));
+
+                console.log("Populando modal concluído. Exibindo modal..."); // Log
+                modal.style.display = "block";
+                console.log("Modal display set to block."); // Log
+
+            } catch (error) {
+                console.error("Erro dentro da função openModal:", error);
+                showNotification("Ocorreu um erro ao exibir os detalhes do pedido.", "error");
             }
-
-            // Adiciona orderId aos botões de status
-            document.querySelectorAll('.status-btn').forEach(btn => btn.dataset.orderId = order.id);
-
-            modal.style.display = 'block';
         }
 
         function closeModal() {
-            modal.style.display = 'none';
-        }
-        // Fecha modal se clicar fora
+            console.log("Fechando modal..."); // Log
+            modal.style.display = "none";
+        }       // Fecha modal se clicar fora
         window.onclick = function(event) {
             if (event.target == modal) {
                 closeModal();
