@@ -91,16 +91,16 @@
         .log-entry { padding: 8px 0; border-bottom: 1px dashed #ddd; display: flex; }
         .log-time { font-weight: bold; color: var(--primary-color); margin-right: 10px; min-width: 80px; }
         .log-message { flex: 1; }
-        .config-button { background-color: var(--accent-color); color: black; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
-        .config-button:hover { background-color: #e6c200; }
-        #integrationConfigForm .form-group { margin-bottom: 20px; }
-        #integrationConfigForm label { display: block; margin-bottom: 5px; font-weight: bold; }
-        #integrationConfigForm input[type="text"], #integrationConfigForm input[type="password"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; }
-        #integrationConfigForm button { background-color: var(--primary-color); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; }
-        #integrationConfigForm button:hover { background-color: #7526c1; }
+        /* **REMOVIDO:** Estilos relacionados ao botão e formulário de configuração */
+        /* .config-button { ... } */
+        /* #integrationConfigForm .form-group { ... } */
+        /* #integrationConfigForm label { ... } */
+        /* #integrationConfigForm input[type="text"], #integrationConfigForm input[type="password"] { ... } */
+        /* #integrationConfigForm button { ... } */
+        /* #integrationConfigForm button:hover { ... } */
         .hidden { display: none !important; }
 
-        /* Estilos da tela de login (reutilizando e adicionando) */
+        /* Estilos da tela de login (mantidos) */
         .login-page {
             display: flex; /* Inicialmente visível */
             justify-content: center;
@@ -178,7 +178,7 @@
             min-height: 1.2em; /* Para evitar que o layout pule */
         }
 
-        /* Responsividade */
+        /* Responsividade (mantida) */
         @media (max-width: 768px) {
             .header { flex-direction: column; text-align: center; }
             .header-left { margin-bottom: 10px; flex-direction: column; }
@@ -236,7 +236,8 @@
         <div class="container">
             <div class="tabs">
                 <button class="tab active" data-tab="pedidos">Pedidos</button>
-                <button class="tab admin-only hidden" data-tab="configuracoes">Configurações</button> <!-- Aba só para admin -->
+                <!-- **REMOVIDO:** Aba de Configurações -->
+                <!-- <button class="tab admin-only hidden" data-tab="configuracoes">Configurações</button> -->
             </div>
 
             <!-- Conteúdo da Aba Pedidos -->
@@ -278,88 +279,33 @@
                 </table>
             </div>
 
-            <!-- Conteúdo da Aba Configurações (Só Admin) -->
-            <div id="configuracoes" class="tab-content admin-only hidden">
-                <h2>Configurações de Integração</h2>
-                <form id="integrationConfigForm">
-                    <div class="form-group">
-                        <label for="webhookUrlNovoPedido">URL Webhook (Novo Pedido):</label>
-                        <input type="text" id="webhookUrlNovoPedido" name="webhookUrlNovoPedido" placeholder="https://seu-webhook.com/novo-pedido">
-                    </div>
-                    <div class="form-group">
-                        <label for="webhookUrlAtualizacaoStatus">URL Webhook (Atualização Status):</label>
-                        <input type="text" id="webhookUrlAtualizacaoStatus" name="webhookUrlAtualizacaoStatus" placeholder="https://seu-webhook.com/status-update">
-                    </div>
-                    <div class="form-group">
-                        <label for="apiKey">Chave de API (se aplicável):</label>
-                        <input type="password" id="apiKey" name="apiKey" placeholder="Sua chave secreta">
-                    </div>
-                    <button type="submit">Salvar Configurações</button>
-                </form>
-                <p id="config-message" style="margin-top: 15px;"></p>
-            </div>
-        </div>
+            <!-- **REMOVIDO:** Conteúdo da Aba Configurações -->
+            <!-- <div id="configuracoes" class="tab-content admin-only hidden"> ... </div> -->
 
-        <!-- Modal de Detalhes do Pedido -->
-        <div id="orderModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal()">&times;</span>
-                <div class="order-details">
-                    <h3>Detalhes do Pedido <span id="modalOrderId"></span></h3>
-                    <div class="detail-row">
-                        <span class="detail-label">Cliente:</span>
-                        <span id="modalClientName" class="detail-value"></span>
+            <!-- Modal de Detalhes do Pedido -->
+            <div id="orderDetailsModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <div id="order-details-content" class="order-details">
+                        <!-- Detalhes serão carregados aqui -->
                     </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Telefone:</span>
-                        <span id="modalClientPhone" class="detail-value"></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Endereço:</span>
-                        <span id="modalClientAddress" class="detail-value"></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Produtos:</span>
-                        <ul id="modalProducts" class="detail-value products-list"></ul>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Valor Total:</span>
-                        <span id="modalTotalValue" class="detail-value"></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Forma Pagamento:</span>
-                        <span id="modalPaymentMethod" class="detail-value"></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Status Atual:</span>
-                        <span id="modalCurrentStatus" class="detail-value"></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Horário Pedido:</span>
-                        <span id="modalTimestamp" class="detail-value"></span>
-                    </div>
-
-                    <h4>Alterar Status:</h4>
-                    <div class="status-actions">
-                        <button class="status-btn btn-received" onclick="updateOrderStatus(this.dataset.orderId, 'Pedido Recebido')">Recebido</button>
-                        <button class="status-btn btn-preparing" onclick="updateOrderStatus(this.dataset.orderId, 'Em Preparo')">Em Preparo</button>
-                        <button class="status-btn btn-ready" onclick="updateOrderStatus(this.dataset.orderId, 'Pronto para Entrega')">Pronto</button>
-                        <button class="status-btn btn-delivering" onclick="updateOrderStatus(this.dataset.orderId, 'Saiu para Entrega')">Saiu Entrega</button>
-                        <button class="status-btn btn-delivered" onclick="updateOrderStatus(this.dataset.orderId, 'Entregue')">Entregue</button>
-                        <button class="status-btn btn-canceled" onclick="updateOrderStatus(this.dataset.orderId, 'Cancelado')">Cancelado</button>
+                    <div id="status-actions-container" class="status-actions">
+                        <!-- Botões de status serão carregados aqui -->
                     </div>
                 </div>
             </div>
+
+            <!-- Container para Notificações -->
+            <div id="notification-container" class="notification-container"></div>
+
+            <!-- Log de Notificações -->
+            <div class="notification-log-container">
+                <h3 class="notification-log-title">Log de Notificações</h3>
+                <div id="notification-log" class="notification-log">
+                    <!-- Entradas de log serão inseridas aqui -->
+                </div>
+            </div>
         </div>
-
-        <!-- Container para Notificações -->
-        <div id="notification-container" class="notification-container"></div>
-
-        <!-- Log de Notificações (Opcional, pode ser removido se não for usado) -->
-        <!-- <div class="container notification-log-container">
-            <h3 class="notification-log-title">Log de Notificações</h3>
-            <div id="notification-log" class="notification-log"></div>
-        </div> -->
     </div>
 
     <script>
@@ -367,72 +313,189 @@
         const appContent = document.getElementById('app-content');
         const loginForm = document.getElementById('login-form');
         const loginError = document.getElementById('login-error');
-        const logoutBtn = document.getElementById('logout-btn');
         const userNameDisplay = document.getElementById('user-name');
         const userRoleDisplay = document.getElementById('user-role');
+        const logoutBtn = document.getElementById('logout-btn');
         const ordersTbody = document.getElementById('orders-tbody');
         const refreshBtn = document.getElementById('refresh-btn');
-        const autoRefreshIntervalSelect = document.getElementById('auto-refresh-interval');
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
-        const modal = document.getElementById('orderModal');
+        const modal = document.getElementById('orderDetailsModal');
+        const modalContent = document.getElementById('order-details-content');
+        const statusActionsContainer = document.getElementById('status-actions-container');
         const notificationContainer = document.getElementById('notification-container');
+        const notificationLog = document.getElementById('notification-log');
+        const autoRefreshSelect = document.getElementById('auto-refresh-interval');
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.tab-content');
-        const configTab = document.querySelector('.tab[data-tab="configuracoes"]');
-        const configForm = document.getElementById('integrationConfigForm');
-        const configMessage = document.getElementById('config-message');
+        // **REMOVIDO:** Variáveis relacionadas ao formulário de configuração
+        // const integrationConfigForm = document.getElementById('integrationConfigForm');
+        // const webhookUrlNovoPedidoInput = document.getElementById('webhookUrlNovoPedido');
+        // const webhookUrlAtualizacaoStatusInput = document.getElementById('webhookUrlAtualizacaoStatus');
+        // const apiKeyInput = document.getElementById('apiKey');
 
+        let currentOrders = [];
+        let filteredOrders = [];
         let autoRefreshIntervalId = null;
-        let currentUserRole = null;
+        let currentUser = null;
+        let notificationSound = new Audio('/home/ubuntu/upload/notification.wav'); // Caminho para o som
 
-        // --- Funções de Notificação ---
+        // --- Funções de Utilidade ---
         function showNotification(message, type = 'info', duration = 5000) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
             notificationContainer.appendChild(notification);
 
+            // Adiciona ao log
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'log-time';
+            timeSpan.textContent = new Date().toLocaleTimeString();
+            const messageSpan = document.createElement('span');
+            messageSpan.className = 'log-message';
+            messageSpan.textContent = message;
+            logEntry.appendChild(timeSpan);
+            logEntry.appendChild(messageSpan);
+            notificationLog.insertBefore(logEntry, notificationLog.firstChild); // Adiciona no topo
+
             setTimeout(() => {
                 notification.remove();
             }, duration);
         }
 
-        // --- Funções de Login/Logout/Sessão ---
+        function formatTimestamp(isoString) {
+            if (!isoString) return 'N/A';
+            try {
+                const date = new Date(isoString);
+                return date.toLocaleString('pt-BR');
+            } catch (e) {
+                return 'Data inválida';
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'Pedido Recebido': return 'status-received';
+                case 'Em Preparo': return 'status-preparing';
+                case 'Pronto para Retirada':
+                case 'Pronto para Entrega': return 'status-ready';
+                case 'Saiu para Entrega': return 'status-delivering';
+                case 'Entregue': return 'status-delivered';
+                case 'Cancelado': return 'status-canceled';
+                default: return '';
+            }
+        }
+
+        function getStatusButtonClass(status) {
+            switch (status) {
+                case 'Pedido Recebido': return 'btn-received';
+                case 'Em Preparo': return 'btn-preparing';
+                case 'Pronto para Retirada':
+                case 'Pronto para Entrega': return 'btn-ready';
+                case 'Saiu para Entrega': return 'btn-delivering';
+                case 'Entregue': return 'btn-delivered';
+                case 'Cancelado': return 'btn-canceled';
+                default: return '';
+            }
+        }
+
+        // --- Funções de API ---
+        async function apiRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers,
+                    },
+                    ...options,
+                });
+                if (response.status === 401) { // Não autorizado (sessão expirou ou inválida)
+                    showNotification('Sua sessão expirou. Faça login novamente.', 'error');
+                    logout();
+                    throw new Error('Unauthorized');
+                }
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido na resposta' }));
+                    throw new Error(errorData.error || `Erro ${response.status}`);
+                }
+                // Se a resposta não tiver corpo (ex: 204 No Content), retorna um objeto vazio
+                if (response.status === 204) {
+                    return {};
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Erro na requisição para ${url}:`, error);
+                if (error.message !== 'Unauthorized') { // Evita duplicar notificação de logout
+                    showNotification(`Erro ao comunicar com o servidor: ${error.message}`, 'error');
+                }
+                throw error; // Re-lança o erro para quem chamou tratar
+            }
+        }
+
+        // --- Funções de Autenticação ---
         async function checkSession() {
             try {
-                const response = await fetch('/session');
-                const data = await response.json();
-
-                if (data.loggedIn && data.user) {
-                    currentUserRole = data.user.role;
-                    showApp(data.user);
+                const data = await apiRequest('/session');
+                if (data.loggedIn) {
+                    currentUser = data.user;
+                    showApp();
                 } else {
                     showLogin();
                 }
             } catch (error) {
-                console.error('Erro ao verificar sessão:', error);
-                showLogin(); // Mostra login em caso de erro
-                loginError.textContent = 'Erro ao conectar com o servidor. Tente novamente mais tarde.';
+                showLogin(); // Se houver erro ao verificar sessão, mostra login
             }
         }
 
-        function showLogin() {
-            loginPage.style.display = 'flex';
-            appContent.classList.add('hidden');
-            currentUserRole = null;
-            stopAutoRefresh(); // Para auto-refresh se estiver ativo
+        async function login(username, password) {
+            try {
+                const data = await apiRequest('/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password }),
+                });
+                if (data.success) {
+                    currentUser = data.user;
+                    showApp();
+                    loginError.textContent = ''; // Limpa erro
+                } else {
+                    loginError.textContent = data.message || 'Erro no login.';
+                }
+            } catch (error) {
+                loginError.textContent = error.message || 'Erro ao tentar fazer login.';
+            }
         }
 
-        function showApp(user) {
-            loginPage.style.display = 'none';
-            appContent.classList.remove('hidden');
-            userNameDisplay.textContent = user.username;
-            userRoleDisplay.textContent = user.role === 'admin' ? 'Administrador' : 'Funcionário';
+        async function logout() {
+            try {
+                await apiRequest('/logout');
+            } catch (error) {
+                // Mesmo com erro no servidor, força o logout no cliente
+                console.error("Erro ao fazer logout no servidor, mas continuando logout no cliente:", error);
+            } finally {
+                currentUser = null;
+                showLogin();
+            }
+        }
 
-            // Controle de acesso visual
-            document.querySelectorAll('.admin-only').forEach(el => {
-                if (user.role === 'admin') {
+        // --- Funções de Interface ---
+        function showLogin() {
+            loginPage.classList.remove('hidden');
+            appContent.classList.add('hidden');
+            stopAutoRefresh(); // Para o refresh se estiver ativo
+        }
+
+        function showApp() {
+            loginPage.classList.add('hidden');
+            appContent.classList.remove('hidden');
+            userNameDisplay.textContent = currentUser.username;
+            userRoleDisplay.textContent = currentUser.role === 'admin' ? 'Administrador' : 'Funcionário';
+
+            // Mostra/esconde elementos baseados na role
+            const adminOnlyElements = document.querySelectorAll('.admin-only');
+            adminOnlyElements.forEach(el => {
+                if (currentUser.role === 'admin') {
                     el.classList.remove('hidden');
                 } else {
                     el.classList.add('hidden');
@@ -440,259 +503,167 @@
             });
 
             fetchOrders(); // Carrega pedidos ao mostrar o app
-            startAutoRefresh(); // Inicia auto-refresh baseado na seleção
-            if (user.role === 'admin') {
-                loadConfig(); // Carrega configurações se for admin
+            startAutoRefresh(); // Inicia o refresh automático com o valor selecionado
+            // **REMOVIDO:** Chamada para loadIntegrationConfig()
+            // if (currentUser.role === 'admin') {
+            //     loadIntegrationConfig();
+            // }
+        }
+
+        function switchTab(tabName) {
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+            tabContents.forEach(content => {
+                content.classList.toggle('active', content.id === tabName);
+            });
+        }
+
+        // --- Funções de Pedidos ---
+        async function fetchOrders() {
+            try {
+                const orders = await apiRequest('/api/pedidos/get-orders');
+                const hasNewOrder = orders.length > currentOrders.length && currentOrders.length > 0;
+                currentOrders = orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Ordena por mais recente
+                filterAndDisplayOrders();
+                if (hasNewOrder) {
+                    showNotification('Novo pedido recebido!', 'success');
+                    playNotificationSound();
+                }
+            } catch (error) {
+                // Erro já notificado por apiRequest
             }
         }
 
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            loginError.textContent = ''; // Limpa erro anterior
-            const username = e.target.username.value;
-            const password = e.target.password.value;
-
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    currentUserRole = data.user.role;
-                    showApp(data.user);
-                } else {
-                    loginError.textContent = data.message || 'Erro no login.';
-                }
-            } catch (error) {
-                console.error('Erro ao fazer login:', error);
-                loginError.textContent = 'Erro ao conectar com o servidor.';
-            }
-        });
-
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch('/logout');
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    showLogin();
-                } else {
-                    showNotification(data.message || 'Erro ao fazer logout.', 'error');
-                }
-            } catch (error) {
-                console.error('Erro ao fazer logout:', error);
-                showNotification('Erro ao conectar com o servidor.', 'error');
-            }
-        });
-
-        // --- Funções de Pedidos ---
-        async function fetchOrders(searchTerm = '') {
-            try {
-                const response = await fetch('/api/pedidos/get-orders');
-                if (!response.ok) {
-                    if (response.status === 401) { // Não autorizado, provavelmente sessão expirou
-                        showLogin();
-                        loginError.textContent = 'Sua sessão expirou. Faça login novamente.';
-                        return;
-                    }
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                let orders = await response.json();
-
-                // Filtrar se houver termo de busca
-                if (searchTerm) {
-                    const lowerSearchTerm = searchTerm.toLowerCase();
-                    orders = orders.filter(order =>
-                        order.id.toLowerCase().includes(lowerSearchTerm) ||
-                        order.nomeCliente.toLowerCase().includes(lowerSearchTerm) ||
-                        order.telefone.includes(searchTerm) // Telefone geralmente não diferencia maiúsc/minúsc
-                    );
-                }
-
-                // **NOVO:** Verificar se há novos pedidos
-                checkForNewOrders(orders);
-
-                displayOrders(orders);
-            } catch (error) {
-                console.error('Erro ao buscar pedidos:', error);
-                showNotification('Erro ao carregar pedidos.', 'error');
-                // Se o erro for 401, o checkSession já deve ter tratado
-            }
+        function filterAndDisplayOrders() {
+            const searchTerm = searchInput.value.toLowerCase();
+            filteredOrders = currentOrders.filter(order => {
+                return (
+                    order.id.toLowerCase().includes(searchTerm) ||
+                    (order.nomeCliente && order.nomeCliente.toLowerCase().includes(searchTerm)) ||
+                    (order.telefone && order.telefone.includes(searchTerm))
+                );
+            });
+            displayOrders(filteredOrders);
         }
 
         function displayOrders(orders) {
-            ordersTbody.innerHTML = ''; // Limpa tabela
-            if (!Array.isArray(orders)) {
-                console.error('Formato de pedidos inválido:', orders);
-                showNotification('Recebido formato de pedidos inválido do servidor.', 'error');
+            ordersTbody.innerHTML = ''; // Limpa a tabela
+            if (orders.length === 0) {
+                ordersTbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum pedido encontrado.</td></tr>';
                 return;
             }
-            orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Ordena por mais recente
-
-            // **NOVO:** Armazenar pedidos globalmente para acesso no event listener
-            window.currentOrders = orders;
-
             orders.forEach(order => {
-                const row = document.createElement('tr');
-                const statusClass = `status-${order.status.toLowerCase().replace(' ', '-').replace('ç', 'c').replace('ã', 'a')}`;
-
-                // **MODIFICADO:** Usar data attribute para o ID e remover onclick inline
+                const row = ordersTbody.insertRow();
                 row.innerHTML = `
                     <td>${order.id.substring(0, 8)}...</td>
-                    <td>${escapeHtml(order.nomeCliente)}</td>
-                    <td>${escapeHtml(order.telefone)}</td>
-                    <td><span class="status-badge ${statusClass}">${escapeHtml(order.status)}</span></td>
-                    <td>${new Date(order.timestamp).toLocaleString('pt-BR')}</td>
+                    <td>${order.nomeCliente || 'N/A'}</td>
+                    <td>${order.telefone || 'N/A'}</td>
+                    <td><span class="status-badge ${getStatusBadgeClass(order.status)}">${order.status}</span></td>
+                    <td>${formatTimestamp(order.timestamp)}</td>
                     <td>
-                        <button class="action-btn details-btn" data-order-id="${order.id}">Detalhes</button>
-                        ${currentUserRole === 'admin' ? `<button class="action-btn delete-btn admin-only" data-order-id="${order.id}">Excluir</button>` : ''}
+                        <button class="action-btn details-btn" onclick="showOrderDetails('${order.id}')">Detalhes</button>
+                        ${currentUser.role === 'admin' ? `<button class="action-btn delete-btn admin-only" onclick="confirmDeleteOrder('${order.id}')">Excluir</button>` : ''}
                     </td>
                 `;
-                ordersTbody.appendChild(row);
             });
+        }
+
+        function showOrderDetails(orderId) {
+            const order = currentOrders.find(o => o.id === orderId);
+            if (!order) return;
+
+            modalContent.innerHTML = `
+                <h3>Detalhes do Pedido #${order.id.substring(0, 8)}</h3>
+                <div class="detail-row"><span class="detail-label">Cliente:</span><span class="detail-value">${order.nomeCliente || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Telefone:</span><span class="detail-value">${order.telefone || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Endereço:</span><span class="detail-value">${order.endereco || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Produtos:</span><span class="detail-value">
+                    ${order.produtos && order.produtos.length > 0
+                        ? `<ul class="products-list">${order.produtos.map(p => `<li>${p}</li>`).join('')}</ul>`
+                        : 'N/A'}
+                </span></div>
+                <div class="detail-row"><span class="detail-label">Valor Total:</span><span class="detail-value">${order.valorTotal !== null ? `R$ ${order.valorTotal.toFixed(2)}` : 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Forma Pag.:</span><span class="detail-value">${order.formaPagamento || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Status Atual:</span><span class="detail-value"><span class="status-badge ${getStatusBadgeClass(order.status)}">${order.status}</span></span></div>
+                <div class="detail-row"><span class="detail-label">Recebido em:</span><span class="detail-value">${formatTimestamp(order.timestamp)}</span></div>
+            `;
+
+            // Adiciona botões de status
+            statusActionsContainer.innerHTML = '';
+            const possibleStatus = [
+                'Pedido Recebido',
+                'Em Preparo',
+                'Pronto para Retirada', // Ou 'Pronto para Entrega'
+                'Saiu para Entrega',
+                'Entregue',
+                'Cancelado'
+            ];
+            possibleStatus.forEach(status => {
+                const btn = document.createElement('button');
+                btn.textContent = status;
+                btn.className = `status-btn ${getStatusButtonClass(status)}`;
+                btn.disabled = order.status === status; // Desabilita o botão do status atual
+                btn.onclick = () => updateOrderStatus(order.id, status);
+                statusActionsContainer.appendChild(btn);
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            modalContent.innerHTML = '';
+            statusActionsContainer.innerHTML = '';
         }
 
         async function updateOrderStatus(orderId, newStatus) {
             try {
-                const response = await fetch('/api/pedidos/update-status', {
+                const result = await apiRequest('/api/pedidos/update-status', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ orderId, newStatus })
                 });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    showNotification(`Status do pedido ${orderId.substring(0, 8)} atualizado para ${newStatus}.`, 'success');
-                    fetchOrders(searchInput.value); // Atualiza a lista
-                    closeModal();
-                } else {
-                     if (response.status === 401) { showLogin(); loginError.textContent = 'Sessão expirada.'; return; }
-                    showNotification(data.message || 'Erro ao atualizar status.', 'error');
-                }
+                showNotification(`Status do pedido #${orderId.substring(0, 8)} atualizado para ${newStatus}.`, 'success');
+                closeModal();
+                fetchOrders(); // Atualiza a lista
             } catch (error) {
-                console.error('Erro ao atualizar status:', error);
-                showNotification('Erro de conexão ao atualizar status.', 'error');
+                // Erro já notificado por apiRequest
+                showNotification(`Erro ao atualizar status: ${error.message}`, 'error');
+            }
+        }
+
+        function confirmDeleteOrder(orderId) {
+            if (confirm(`Tem certeza que deseja excluir o pedido #${orderId.substring(0, 8)}? Esta ação não pode ser desfeita.`)) {
+                deleteOrder(orderId);
             }
         }
 
         async function deleteOrder(orderId) {
-            if (!confirm(`Tem certeza que deseja excluir o pedido ${orderId.substring(0, 8)}? Esta ação não pode ser desfeita.`)) {
+            if (currentUser.role !== 'admin') {
+                showNotification('Apenas administradores podem excluir pedidos.', 'error');
                 return;
             }
             try {
-                const response = await fetch(`/api/pedidos/${orderId}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    showNotification(`Pedido ${orderId.substring(0, 8)} excluído com sucesso.`, 'success');
-                    fetchOrders(searchInput.value); // Atualiza a lista
-                } else {
-                    if (response.status === 401) { showLogin(); loginError.textContent = 'Sessão expirada.'; return; }
-                    if (response.status === 403) { showNotification('Acesso negado. Somente administradores podem excluir pedidos.', 'error'); return; }
-                    showNotification(data.message || 'Erro ao excluir pedido.', 'error');
-                }
+                await apiRequest(`/api/pedidos/${orderId}`, { method: 'DELETE' });
+                showNotification(`Pedido #${orderId.substring(0, 8)} excluído com sucesso.`, 'success');
+                fetchOrders(); // Atualiza a lista
             } catch (error) {
-                console.error('Erro ao excluir pedido:', error);
-                showNotification('Erro de conexão ao excluir pedido.', 'error');
+                // Erro já notificado por apiRequest
+                showNotification(`Erro ao excluir pedido: ${error.message}`, 'error');
             }
         }
 
-        // --- Funções do Modal ---
-        function openModal(order) {
-            console.log("Abrindo modal para o pedido:", order); // Log para depuração
-            try {
-                if (!order) {
-                    console.error("Tentativa de abrir modal com pedido inválido.");
-                    showNotification("Erro ao obter dados do pedido para detalhes.", "error");
-                    return;
-                }
+        // --- Funções de Configuração (Removidas) ---
+        // async function loadIntegrationConfig() { ... }
+        // async function saveIntegrationConfig(event) { ... }
 
-                document.getElementById("modalOrderId").textContent =
-                    order.id?.substring(0, 8) + "..." || "N/A";
-                document.getElementById("modalClientName").textContent =
-                    escapeHtml(order.nomeCliente) || "N/A";
-                document.getElementById("modalClientPhone").textContent =
-                    escapeHtml(order.telefone) || "N/A";
-                document.getElementById("modalClientAddress").textContent =
-                    escapeHtml(order.endereco) || "N/A";
-                
-                // **MODIFICADO:** Adicionar verificação para valorTotal antes de chamar toFixed
-                const valorTotalText = 
-                    (order.valorTotal !== null && typeof order.valorTotal !== "undefined")
-                    ? `R$ ${order.valorTotal.toFixed(2).replace(".", ",")}`
-                    : "N/A";
-                document.getElementById("modalTotalValue").textContent = valorTotalText;
-
-                document.getElementById("modalPaymentMethod").textContent =
-                    escapeHtml(order.formaPagamento) || "N/A";
-                document.getElementById("modalCurrentStatus").textContent =
-                    escapeHtml(order.status) || "N/A";
-                document.getElementById("modalTimestamp").textContent =
-                    order.timestamp
-                        ? new Date(order.timestamp).toLocaleString("pt-BR")
-                        : "N/A";
-
-                const productsList = document.getElementById("modalProducts");
-                productsList.innerHTML = ""; // Limpa lista anterior
-                if (Array.isArray(order.produtos)) {
-                    if (order.produtos.length > 0) {
-                        order.produtos.forEach((prod) => {
-                            const li = document.createElement("li");
-                            li.textContent = escapeHtml(prod);
-                            productsList.appendChild(li);
-                        });
-                    } else {
-                         const li = document.createElement("li");
-                         li.textContent = "Nenhum produto listado.";
-                         productsList.appendChild(li);
-                    }
-                } else if (typeof order.produtos === "string" && order.produtos.trim() !== "") {
-                    // Caso ainda venha como string
-                    const li = document.createElement("li");
-                    li.textContent = escapeHtml(order.produtos);
-                    productsList.appendChild(li);
-                } else {
-                     const li = document.createElement("li");
-                     li.textContent = "Nenhum produto listado.";
-                     productsList.appendChild(li);
-                }
-
-                // Adiciona orderId aos botões de status
-                document
-                    .querySelectorAll(".status-btn")
-                    .forEach((btn) => (btn.dataset.orderId = order.id));
-
-                console.log("Populando modal concluído. Exibindo modal..."); // Log
-                modal.style.display = "block";
-                console.log("Modal display set to block."); // Log
-
-            } catch (error) {
-                console.error("Erro dentro da função openModal:", error);
-                showNotification("Ocorreu um erro ao exibir os detalhes do pedido.", "error");
-            }
-        }
-
-        function closeModal() {
-            console.log("Fechando modal..."); // Log
-            modal.style.display = "none";
-        }       // Fecha modal se clicar fora
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-
-        // --- Funções de Auto-Refresh e Busca ---
+        // --- Funções de Refresh e Som ---
         function startAutoRefresh() {
             stopAutoRefresh(); // Garante que não haja múltiplos intervalos
-            const intervalSeconds = parseInt(autoRefreshIntervalSelect.value);
+            const intervalSeconds = parseInt(autoRefreshSelect.value, 10);
             if (intervalSeconds > 0) {
-                autoRefreshIntervalId = setInterval(() => {
-                    fetchOrders(searchInput.value);
-                    console.log(`Pedidos atualizados automaticamente (${intervalSeconds}s)`);
-                }, intervalSeconds * 1000);
+                autoRefreshIntervalId = setInterval(fetchOrders, intervalSeconds * 1000);
+                console.log(`Auto-refresh iniciado a cada ${intervalSeconds} segundos.`);
             }
         }
 
@@ -700,183 +671,58 @@
             if (autoRefreshIntervalId) {
                 clearInterval(autoRefreshIntervalId);
                 autoRefreshIntervalId = null;
+                console.log('Auto-refresh parado.');
             }
-        }
-
-        refreshBtn.addEventListener('click', () => fetchOrders(searchInput.value));
-        autoRefreshIntervalSelect.addEventListener('change', startAutoRefresh);
-        searchBtn.addEventListener('click', () => fetchOrders(searchInput.value));
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                fetchOrders(searchInput.value);
-            }
-        });
-
-        // --- Funções das Abas ---
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Remove active class de todas as abas e conteúdos
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-
-                // Adiciona active class à aba clicada e ao conteúdo correspondente
-                tab.classList.add('active');
-                const targetContentId = tab.getAttribute('data-tab');
-                document.getElementById(targetContentId).classList.add('active');
-            });
-        });
-
-        // --- Funções de Configuração (Admin) ---
-        async function loadConfig() {
-            if (currentUserRole !== 'admin') return;
-            try {
-                const response = await fetch('/api/config');
-                 if (!response.ok) {
-                    if (response.status === 401) { showLogin(); loginError.textContent = 'Sessão expirada.'; return; }
-                    if (response.status === 403) { showNotification('Acesso negado às configurações.', 'error'); return; }
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                const config = await response.json();
-                document.getElementById('webhookUrlNovoPedido').value = config.webhookUrlNovoPedido || '';
-                document.getElementById('webhookUrlAtualizacaoStatus').value = config.webhookUrlAtualizacaoStatus || '';
-                document.getElementById('apiKey').value = config.apiKey || '';
-            } catch (error) {
-                console.error('Erro ao carregar configurações:', error);
-                showNotification('Erro ao carregar configurações.', 'error');
-            }
-        }
-
-        configForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            configMessage.textContent = '';
-            const webhookUrlNovoPedido = document.getElementById('webhookUrlNovoPedido').value;
-            const webhookUrlAtualizacaoStatus = document.getElementById('webhookUrlAtualizacaoStatus').value;
-            const apiKey = document.getElementById('apiKey').value;
-
-            try {
-                const response = await fetch('/api/config', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ webhookUrlNovoPedido, webhookUrlAtualizacaoStatus, apiKey })
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    configMessage.textContent = 'Configurações salvas com sucesso!';
-                    configMessage.style.color = 'var(--success-color)';
-                    showNotification('Configurações salvas!', 'success');
-                } else {
-                    if (response.status === 401) { showLogin(); loginError.textContent = 'Sessão expirada.'; return; }
-                    if (response.status === 403) { showNotification('Acesso negado. Somente administradores podem salvar configurações.', 'error'); return; }
-                    configMessage.textContent = data.message || 'Erro ao salvar configurações.';
-                    configMessage.style.color = 'var(--danger-color)';
-                }
-            } catch (error) {
-                console.error('Erro ao salvar configurações:', error);
-                configMessage.textContent = 'Erro de conexão ao salvar configurações.';
-                configMessage.style.color = 'var(--danger-color)';
-            }
-        });
-
-        // --- Utils ---
-        function escapeHtml(unsafe) {
-            if (unsafe === null || typeof unsafe === 'undefined') return '';
-            return String(unsafe)
-                 .replace(/&/g, "&amp;")
-                 .replace(/</g, "&lt;")
-                 .replace(/>/g, "&gt;")
-                 .replace(/"/g, "&quot;")
-                 .replace(/'/g, "&#039;");
-        }
-
-        // --- Inicialização ---
-        document.addEventListener('DOMContentLoaded', () => {
-            checkSession();
-            
-            // **NOVO:** Event listener para botões de detalhes e exclusão
-            document.addEventListener('click', function(e) {
-                // Botão de detalhes
-                if (e.target.classList.contains('details-btn')) {
-                    const orderId = e.target.getAttribute('data-order-id');
-                    const order = window.currentOrders.find(o => o.id === orderId);
-                    if (order) {
-                        openModal(order);
-                    } else {
-                        console.error('Pedido não encontrado:', orderId);
-                        showNotification('Erro ao abrir detalhes do pedido.', 'error');
-                    }
-                }
-                
-                // Botão de exclusão
-                if (e.target.classList.contains('delete-btn')) {
-                    const orderId = e.target.getAttribute('data-order-id');
-                    if (orderId) {
-                        deleteOrder(orderId);
-                    }
-                }
-            });
-        });
-
-        // Função para verificar novos pedidos e tocar som de notificação
-        // Definida diretamente aqui para garantir disponibilidade
-        let previousOrdersCount = 0;
-        let notificationSound = null;
-
-        function initNotificationSound() {
-            notificationSound = new Audio('notification.wav');
-            notificationSound.volume = 1.0; // Volume máximo
-            console.log('Som de notificação inicializado');
         }
 
         function playNotificationSound() {
-            if (notificationSound) {
-                // Reinicia o som para garantir que toque mesmo se já estiver tocando
-                notificationSound.pause();
-                notificationSound.currentTime = 0;
-                
-                // Tenta tocar o som (pode falhar se o usuário não interagiu com a página)
-                const playPromise = notificationSound.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.warn('Não foi possível tocar o som de notificação:', error);
-                    });
-                }
-            } else {
-                console.warn('Som de notificação não inicializado');
-                // Tenta inicializar novamente
-                initNotificationSound();
+            notificationSound.play().catch(error => {
+                console.warn("Não foi possível tocar o som de notificação:", error);
+                // Pode ser necessário interação do usuário para tocar áudio em alguns navegadores
+            });
+        }
+
+        // --- Event Listeners ---
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = loginForm.username.value;
+            const password = loginForm.password.value;
+            login(username, password);
+        });
+
+        logoutBtn.addEventListener('click', logout);
+
+        refreshBtn.addEventListener('click', fetchOrders);
+
+        searchBtn.addEventListener('click', filterAndDisplayOrders);
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                filterAndDisplayOrders();
+            }
+        });
+
+        autoRefreshSelect.addEventListener('change', startAutoRefresh);
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+        });
+
+        // Fecha o modal se clicar fora do conteúdo
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
             }
         }
 
-        function checkForNewOrders(orders) {
-            if (!Array.isArray(orders)) return;
-            
-            // Se é a primeira vez que carregamos pedidos, apenas armazenar o número
-            if (previousOrdersCount === 0) {
-                previousOrdersCount = orders.length;
-                return;
-            }
-            
-            // Se há mais pedidos agora do que antes, tocar o som
-            if (orders.length > previousOrdersCount) {
-                console.log(`Novos pedidos detectados! Anterior: ${previousOrdersCount}, Atual: ${orders.length}`);
-                playNotificationSound();
-                
-                // Mostrar notificação visual também
-                const newOrdersCount = orders.length - previousOrdersCount;
-                const message = newOrdersCount === 1 
-                    ? "1 novo pedido recebido!" 
-                    : `${newOrdersCount} novos pedidos recebidos!`;
-                
-                showNotification(message, 'success');
-            }
-            
-            // Atualizar o contador para a próxima verificação
-            previousOrdersCount = orders.length;
-        }
+        // **REMOVIDO:** Event listener para o formulário de configuração
+        // if (integrationConfigForm) {
+        //     integrationConfigForm.addEventListener('submit', saveIntegrationConfig);
+        // }
 
-        // Inicializar o som quando o documento estiver pronto
-        document.addEventListener('DOMContentLoaded', initNotificationSound);
+        // --- Inicialização ---
+        checkSession(); // Verifica a sessão ao carregar a página
+
     </script>
 </body>
 </html>
+
