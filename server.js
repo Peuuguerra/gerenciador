@@ -183,43 +183,60 @@ app.post("/api/pedidos/get-orders", (req, res) => {
     console.log("Recebido pedido:", req.body);
     const data = fs.readFileSync(pedidosFile, "utf8");
     const pedidos = JSON.parse(data);
-    
-    // **MODIFICADO:** Usar valores vazios se não forem enviados
-    const Cliente = req.body.Cliente || ""; 
-    const Telefone = req.body.Telefone || "";
-    const Endereco = req.body.Endereço || ""; // Usar string vazia se não houver Endereço
-    const ProdutosInput = req.body.Produtos; // Pega o input de produtos
-    const formaPagamento = req.body["Forma de Pagamento"] || "";
 
-    // **MODIFICADO:** Tratar ProdutosInput para ser array vazio se não houver input
+    // Extrair dados do corpo da requisição
+    const Cliente = req.body.Cliente || "";
+    const Telefone = req.body.Telefone || "";
+    const Endereco = req.body.Endereço || "";
+    const ProdutosInput = req.body.Produtos;
+    const formaPagamento = req.body["Forma de Pagamento"] || "";
     let produtosArray = [];
     if (ProdutosInput) {
         produtosArray = Array.isArray(ProdutosInput) ? ProdutosInput : [ProdutosInput];
     }
-
-    // **MODIFICADO:** Usar valor total do n8n se disponível, senão definir como null
-    let valorTotalPedido = null; // Define como null por padrão
-    const valorTotalInput = req.body['ValorTotal'] || req.body.valorTotal; // Tenta pegar 'ValorTotal' ou 'valorTotal'
+    let valorTotalPedido = null;
+    const valorTotalInput = req.body['ValorTotal'] || req.body.valorTotal;
     if (valorTotalInput !== undefined && !isNaN(parseFloat(valorTotalInput))) {
         valorTotalPedido = parseFloat(valorTotalInput);
         console.log(`Usando ValorTotal recebido: ${valorTotalPedido}`);
     } else {
-        // Não calcula mais fallback, mantém como null
         console.log(`ValorTotal não recebido ou inválido. Definido como null.`);
     }
+
+    // *** NOVO: Verificação de duplicidade ***
+    const DUPLICATE_CHECK_WINDOW_MS = 5 * 60 * 1000; // Janela de 5 minutos
+    const now = Date.now();
+    const potentialDuplicate = pedidos.find(p =>
+        p.telefone === Telefone &&
+        p.nomeCliente === Cliente && // Adiciona verificação de nome para maior precisão
+        // Compara arrays de produtos (ordena para garantir consistência)
+        JSON.stringify(p.produtos.sort()) === JSON.stringify(produtosArray.sort()) &&
+        (now - new Date(p.timestamp).getTime()) < DUPLICATE_CHECK_WINDOW_MS
+    );
+
+    if (potentialDuplicate) {
+        console.warn(`Pedido potencialmente duplicado detectado para ${Telefone}. Pedido existente: ${potentialDuplicate.id}. Ignorando.`);
+        // Retorna sucesso (200 OK) mas com mensagem indicando duplicidade
+        return res.status(200).json({
+            success: true,
+            message: "Pedido recebido, mas parece ser um duplicado de um pedido recente. Nenhuma nova entrada criada.",
+            pedidoIdExistente: potentialDuplicate.id
+        });
+    }
+    // *** FIM NOVO ***
 
     const novoPedido = {
       id: generateOrderId(),
       nomeCliente: Cliente,
       telefone: Telefone,
-      endereco: Endereco, // Salva string vazia se não veio
-      produtos: produtosArray, // Salva array vazio se não veio
-      valorTotal: valorTotalPedido, // Usa o valor determinado acima (pode ser null)
+      endereco: Endereco,
+      produtos: produtosArray,
+      valorTotal: valorTotalPedido,
       status: "Pedido Recebido",
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString(), // Usa o timestamp atual
       formaPagamento: formaPagamento,
     };
-    
+
     pedidos.push(novoPedido);
     fs.writeFileSync(pedidosFile, JSON.stringify(pedidos, null, 2));
     const logMessage = `[${new Date().toISOString()}] Novo pedido: ${JSON.stringify(
@@ -255,7 +272,7 @@ function calcularValorTotal(produtosArray) { // **MODIFICADO:** Recebe o array d
   if (!produtosArray || produtosArray.length === 0) {
       return parseFloat(valor.toFixed(2));
   }
-  
+
   produtosArray.forEach((produto) => {
     if (typeof produto === "string") {
       // Garante que é string
@@ -424,9 +441,6 @@ app.get("*/", (req, res) => {
 
 // Iniciar o servidor
 app.listen(PORT, () => {
-  console.log(`Servidor Mr. Shake rodando na porta ${PORT}`);
-  // Aviso sobre cookie não seguro (para lembrar de mudar em produção)
-  console.warn(
-    "AVISO: Cookie de sessão configurado como secure: false para teste. Mude para secure: true em produção com HTTPS."
-  );
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
+
