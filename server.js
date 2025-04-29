@@ -6,8 +6,8 @@ const path = require("path");
 const session = require("express-session");
 // **MODIFICADO:** Remover configFile da importação, pois não é mais usado
 const { dataDir, pedidosFile } = require("./config");
-// **MODIFICADO:** Usar a versão hardcoded do n8n-integration
-const n8nIntegration = require("./n8n-integration_hardcoded.js");
+// Importar módulo de integração n8n (versão com URLs hardcoded)
+const n8nIntegration = require("./n8n-integration.js");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -279,4 +279,3 @@ app.get("*/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
-
