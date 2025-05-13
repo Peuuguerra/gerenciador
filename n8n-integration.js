@@ -17,7 +17,7 @@ const n8nConfig = {
   webhookUrlNovoPedido: "https://n8n-n8n-start.moas8k.easypanel.host/webhook/novoPedido",
 
   // !! IMPORTANTE: Substitua "" pela URL do seu webhook n8n para ATUALIZAÇÕES DE STATUS
-  webhookUrlAtualizacaoStatus: "https://n8n-n8n-start.moas8k.easypanel.host/webhook-test/atualizaStatus",
+  webhookUrlAtualizacaoStatus: "https://n8n-n8n-start.moas8k.easypanel.host/webhook/atualizaStatus",
 
   // !! IMPORTANTE: Substitua "" pela sua API Key do n8n (se usar autenticação por API Key)
   apiKey: "",
