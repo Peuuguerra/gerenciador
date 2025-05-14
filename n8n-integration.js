@@ -14,10 +14,10 @@ const { dataDir } = require("./config"); // Manter dataDir se ainda for usado pa
 // Insira suas URLs e API Key abaixo.
 const n8nConfig = {
   // !! IMPORTANTE: Substitua "" pela URL do seu webhook n8n para NOVOS PEDIDOS
-  webhookUrlNovoPedido: "https://n8n-n8n-start.moas8k.easypanel.host/webhook/novoPedido",
+  webhookUrlNovoPedido: "https://n8n-n8n-start.moas8k.easypanel.host/webhook/4578cf69-102e-4c60-a9aa-2dc5fd525901",
 
   // !! IMPORTANTE: Substitua "" pela URL do seu webhook n8n para ATUALIZAÇÕES DE STATUS
-  webhookUrlAtualizacaoStatus: "https://n8n-n8n-start.moas8k.easypanel.host/webhook/atualizaStatus",
+  webhookUrlAtualizacaoStatus: "https://n8n-n8n-start.moas8k.easypanel.host/webhook/d2cbc663-63b5-43e1-ac84-28d38cf613c0",
 
   // !! IMPORTANTE: Substitua "" pela sua API Key do n8n (se usar autenticação por API Key)
   apiKey: "",
